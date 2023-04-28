@@ -48,7 +48,7 @@ defmodule Relations.Generator do
   	 end)
   	|> Enum.unzip()
 
-  	clauses ++ [[do: args]] |> IO.inspect()
+  	clauses ++ [[do: args]] 
   end
   	
 

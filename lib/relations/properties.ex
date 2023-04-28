@@ -18,18 +18,18 @@ defmodule Relations.Properties do
   end
 
 
-  def symmetric_prop_descr(generator, relation) do
+  def reflexive_prop_descr(generator, relation) do
 
     rel_str = string_or_inspect(relation)
 
     gen_str = string_or_inspect(generator)
 
 
-    "#{rel_str} is symmetric for #{gen_str}" 
+    "#{rel_str} is reflexive for #{gen_str}" 
 
   end
 
-  def symmetric_inspect_descr(value, relation) do
+  def reflexive_inspect_descr(value, relation) do
     
     rel_str = string_or_inspect(relation)
 
@@ -40,16 +40,14 @@ defmodule Relations.Properties do
   end
 
 
-  defmacro symmetric(generator, relation, [inspect: inspect] \\ [inspect: false]) do
-
-
+  defmacro reflexive(generator, relation, [inspect: inspect] \\ [inspect: false]) do
 
 
     quoted_check = if inspect do
       quote do
 check all(r <- unquote(generator) ) do
 
-            IO.write(Relations.Properties.symmetric_inspect_descr(r, unquote(relation)))
+            IO.write(Relations.Properties.reflexive_inspect_descr(r, unquote(relation)))
             res = unquote(relation).(r, r)
             IO.inspect(res)
             assert res
@@ -66,7 +64,7 @@ else
 
     
       quote do
-        property Relations.Properties.symmetric_prop_descr(unquote(generator), unquote(relation)) do
+        property Relations.Properties.reflexive_prop_descr(unquote(generator), unquote(relation)) do
         unquote(quoted_check)
         end
       end
@@ -77,52 +75,127 @@ else
 
 
 
+  def symmetric_prop_descr(generator, relation) do
+
+    rel_str = string_or_inspect(relation)
+
+    gen_str = string_or_inspect(generator)
 
 
+    "#{rel_str} is symmetric for #{gen_str}" 
 
-defmacro reflexive(generator, relation) do
-
-  rel_str = if is_nil(String.Chars.impl_for(relation))do
-    Kernel.inspect(relation)
-  else
-    String.Chars.to_string(relation)
   end
 
-  gen_str = if is_nil(String.Chars.impl_for(generator))do
-    Kernel.inspect(generator)
-  else
-    String.Chars.to_string(generator)
+  def symmetric_inspect_descr(value_l, value_r, relation) do
+    
+    rel_str = string_or_inspect(relation)
+
+    value_l_str = string_or_inspect(value_l)
+
+    value_r_str = string_or_inspect(value_r)
+
+    "#{rel_str}.(#{value_l_str}, #{value_r_str}) => #{rel_str}.(#{value_r_str}, #{value_l_str}) ? "
+
   end
 
-	quote location: :keep do
-      property "#{unquote(rel_str)} is reflexive for #{unquote(gen_str)}" do
-        check all(
+
+
+
+defmacro symmetric(generator, relation, [inspect: inspect] \\ [inspect: false]) do
+
+    quoted_check = if inspect do
+      quote do
+check all(
                 a <- unquote(generator),
                 b <- unquote(generator)
               ) do
-          assert unquote(relation)(a, b) === unquote(relation)(b, a)
+
+            IO.write(Relations.Properties.symmetric_inspect_descr(a, b, unquote(relation)))
+            res = if unquote(relation).(a, b), do: unquote(relation).(b, a), else: true  # pass as relation doesnt have to be true for all values...
+            IO.inspect(res)
+            assert res
+      end
+          end
+else
+  quote do
+            check all(
+                a <- unquote(generator),
+                b <- unquote(generator)
+              )  do
+            if unquote(relation).(a, b), do: unquote(relation).(b, a), else: true  # pass as relation doesnt have to be true for all values...
+          end
         end
+      end
+
+	quote do
+      property Relations.Properties.symmetric_prop_descr(unquote(generator), unquote(relation)) do
+        unquote(quoted_check)
       end
   end
 end
 
-def transitive(module, relation) do
-	      quote do  # TODO : location :keep ??
-      
-      property "#{unquote(relation)} is transitive" do
-        # Note: For praticallity we may want to generate only one rational, and "perturbate " it to test equality transitivity.
-        check all(
-                b <- unquote(module).generator(),
-                a <- unquote(module).generator(),
-                c <- unquote(module).generator()
+
+  def transitive_prop_descr(generator, relation) do
+
+    rel_str = string_or_inspect(relation)
+
+    gen_str = string_or_inspect(generator)
+
+
+    "#{rel_str} is transitive for #{gen_str}" 
+
+  end
+
+  def transitive_inspect_descr(value_l, value_m, value_r, relation) do
+    
+    rel_str = string_or_inspect(relation)
+
+    value_l_str = string_or_inspect(value_l)
+    value_m_str = string_or_inspect(value_m)
+
+    value_r_str = string_or_inspect(value_r)
+
+    "#{rel_str}.(#{value_l_str}, #{value_m_str}) and #{rel_str}.(#{value_m_str}, #{value_r_str}) => #{rel_str}.(#{value_l_str}, #{value_r_str}) ? "
+
+  end
+
+
+
+
+defmacro transitive(generator, relation, [inspect: inspect] \\ [inspect: false])  do
+
+    quoted_check = if inspect do
+      quote do
+check all(
+                a <- unquote(generator),
+                b <- unquote(generator),
+                c <- unquote(generator)
               ) do
-          # ap <- integer(),
-          # cp <- integer() do
-          #   a = Rational.perturbate(b, ap)
-          #   c = Rational.perturbate(b, ac)
-          assert not (apply(unquote(module), unquote(relation), [a, b]) and apply(unquote(module), unquote(relation), [b, c]) and
-                        not apply(unquote(module), unquote(relation), [a, c]))
-        end
+
+            IO.write(Relations.Properties.transitive_inspect_descr(a, b, c, unquote(relation)))
+            res =  if unquote(relation).(a, b) and unquote(relation).(b, c), do: unquote(relation).(a, c), else: true  # pass as relation doesnt have to be true for all values...
+            IO.inspect(res)
+            assert res
+end
+end
+else
+      quote do
+check all(
+                a <- unquote(generator),
+                b <- unquote(generator),
+                c <- unquote(generator)
+              ) do
+
+      if unquote(relation).(a, b) and unquote(relation).(b, c), do: unquote(relation).(a, c), else: true  # pass as relation doesnt have to be true for all values...
+
+end
+end 
+end
+
+
+  quote do
+      property Relations.Properties.transitive_prop_descr(unquote(generator), unquote(relation)) do
+        unquote(quoted_check)
       end
   end
 end
