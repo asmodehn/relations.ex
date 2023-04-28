@@ -31,7 +31,10 @@ defmodule Relations.Properties do
     "#{rel_str}.(#{value_str}, #{value_str}) ? "
   end
 
-  defmacro reflexive(generator, relation, [inspect: inspect] \\ [inspect: false]) do
+  defmacro reflexive(generator, relation, opts \\ [inspect: false]) do
+    inspect = Keyword.get(opts, :inspect)
+    descr = Keyword.get(opts, :descr)
+
     quoted_check =
       if inspect do
         quote do
@@ -50,9 +53,17 @@ defmodule Relations.Properties do
         end
       end
 
-    quote do
-      property Relations.Properties.reflexive_prop_descr(unquote(generator), unquote(relation)) do
-        unquote(quoted_check)
+    if descr do
+      quote do
+        property unquote(descr) do
+          unquote(quoted_check)
+        end
+      end
+    else
+      quote do
+        property Relations.Properties.reflexive_prop_descr(unquote(generator), unquote(relation)) do
+          unquote(quoted_check)
+        end
       end
     end
   end
@@ -75,7 +86,10 @@ defmodule Relations.Properties do
     "#{rel_str}.(#{value_l_str}, #{value_r_str}) => #{rel_str}.(#{value_r_str}, #{value_l_str}) ? "
   end
 
-  defmacro symmetric(generator, relation, [inspect: inspect] \\ [inspect: false]) do
+  defmacro symmetric(generator, relation, opts \\ [descr: nil, inspect: false]) do
+    inspect = Keyword.get(opts, :inspect)
+    descr = Keyword.get(opts, :descr)
+
     quoted_check =
       if inspect do
         quote do
@@ -103,9 +117,17 @@ defmodule Relations.Properties do
         end
       end
 
-    quote do
-      property Relations.Properties.symmetric_prop_descr(unquote(generator), unquote(relation)) do
-        unquote(quoted_check)
+    if descr do
+      quote do
+        property unquote(descr) do
+          unquote(quoted_check)
+        end
+      end
+    else
+      quote do
+        property Relations.Properties.symmetric_prop_descr(unquote(generator), unquote(relation)) do
+          unquote(quoted_check)
+        end
       end
     end
   end
@@ -129,7 +151,10 @@ defmodule Relations.Properties do
     "#{rel_str}.(#{value_l_str}, #{value_m_str}) and #{rel_str}.(#{value_m_str}, #{value_r_str}) => #{rel_str}.(#{value_l_str}, #{value_r_str}) ? "
   end
 
-  defmacro transitive(generator, relation, [inspect: inspect] \\ [inspect: false]) do
+  defmacro transitive(generator, relation, opts \\ [descr: nil, inspect: false]) do
+    inspect = Keyword.get(opts, :inspect)
+    descr = Keyword.get(opts, :descr)
+
     quoted_check =
       if inspect do
         quote do
@@ -165,9 +190,17 @@ defmodule Relations.Properties do
         end
       end
 
-    quote do
-      property Relations.Properties.transitive_prop_descr(unquote(generator), unquote(relation)) do
-        unquote(quoted_check)
+    if descr do
+      quote do
+        property unquote(descr) do
+          unquote(quoted_check)
+        end
+      end
+    else
+      quote do
+        property Relations.Properties.transitive_prop_descr(unquote(generator), unquote(relation)) do
+          unquote(quoted_check)
+        end
       end
     end
   end
@@ -197,18 +230,21 @@ defmodule Relations.Properties do
           {:reflexive, true} ->
             quote do:
                     Relations.Properties.reflexive(unquote(generator), unquote(relation),
+                      descr: "is reflexive",
                       inspect: unquote(inspect)
                     )
 
           {:symmetric, true} ->
             quote do:
                     Relations.Properties.symmetric(unquote(generator), unquote(relation),
+                      descr: "is symmetric",
                       inspect: unquote(inspect)
                     )
 
           {:transitive, true} ->
             quote do:
                     Relations.Properties.transitive(unquote(generator), unquote(relation),
+                      descr: "is transitive",
                       inspect: unquote(inspect)
                     )
 
