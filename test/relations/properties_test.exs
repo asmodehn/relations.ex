@@ -24,6 +24,15 @@ defmodule Relations.PropertiesTest do
     # Equality on integers is an equivalence relation so it is symmetric
     Properties.symmetric(StreamData.integer(), &Kernel.==/2)
 
+    #
+    # divisibility is NOT symmetric => This should error on `mix test` if enabled
+    #
+    # Properties.symmetric(
+    #   StreamData.integer() |> StreamData.filter(fn x -> x != 0 end),
+    #   fn l, r -> rem(l, r) == 0 end,
+    #   inspect: true
+    # )
+
     require Integer
 
     # symmetric "x and y are odd" relation, by "and" symmetry ( also works when "and" breaks out early )
@@ -48,8 +57,15 @@ defmodule Relations.PropertiesTest do
     )
 
     # order relation is transitive on integers
-    Properties.transitive(StreamData.integer(), &Kernel.>/2, inspect: true)
+    Properties.transitive(StreamData.integer(), &Kernel.>/2, inspect: false)
 
     # more simple, yet non-trivial examples ?
   end
+
+  Properties.describe(StreamData.integer(), &Kernel.==/2,
+    reflexive: true,
+    symmetric: true,
+    transitive: true,
+    inspect: false
+  )
 end

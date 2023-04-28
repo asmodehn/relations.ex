@@ -97,6 +97,7 @@ defmodule Relations.Properties do
                   b <- unquote(generator)
                 ) do
             # pass as relation doesnt have to be true for all values...
+            # TODO : more optimal generator ?? CAREFUL : we want to be sure not to miss anything
             if unquote(relation).(a, b), do: unquote(relation).(b, a), else: true
           end
         end
@@ -156,6 +157,7 @@ defmodule Relations.Properties do
                   c <- unquote(generator)
                 ) do
             # pass as relation doesnt have to be true for all values...
+            # TODO : more optimal generator ?? CAREFUL : we want to be sure not to miss anything
             if unquote(relation).(a, b) and unquote(relation).(b, c),
               do: unquote(relation).(a, c),
               else: true
@@ -170,33 +172,94 @@ defmodule Relations.Properties do
     end
   end
 
-  # def all(properties) when is_list(properties) do
+  def describe_descr(generator, relation) do
+    rel_str = string_or_inspect(relation)
+
+    gen_str = string_or_inspect(generator)
+
+    "#{rel_str} for #{gen_str}"
+  end
+
+  defmacro describe(generator, relation, properties \\ [])
+           when is_list(properties)
+           when is_map(properties) do
+    # properties |> IO.inspect()
+
+    # pass into a map for easy partial match.
+    properties = if is_list(properties), do: properties |> Enum.into(%{}), else: properties
+    inspect = Map.get(properties, :inspect, false)
+
+    prop_checks =
+      properties
+      |> Map.drop([:inspect])
+      |> Enum.map(fn {k, e} ->
+        case {k, e} do
+          {:reflexive, true} ->
+            quote do:
+                    Relations.Properties.reflexive(unquote(generator), unquote(relation),
+                      inspect: unquote(inspect)
+                    )
+
+          {:symmetric, true} ->
+            quote do:
+                    Relations.Properties.symmetric(unquote(generator), unquote(relation),
+                      inspect: unquote(inspect)
+                    )
+
+          {:transitive, true} ->
+            quote do:
+                    Relations.Properties.transitive(unquote(generator), unquote(relation),
+                      inspect: unquote(inspect)
+                    )
+
+          # TODO : handle false case ? semantics ? need to be compared with not present (ie. no test) 
+          unknown ->
+            raise RuntimeError, message: "#{Kernel.inspect(unknown)} is not a known property"
+        end
+      end)
+
+    quote location: :keep do
+      describe Relations.Properties.describe_descr(unquote(generator), unquote(relation)) do
+        unquote(prop_checks)
+      end
+    end
+  end
+
+  # defmacro module(properties\\ []) when is_list(properties) do
   #   properties |> Enum.into(%{}) |> all()
   # end
 
-  # def all(properties) when is_map(properties) do
+  # defmacro module(properties) when is_map(properties) do
   #   symm = properties |> Map.get(:symmetric)
   #   refl = properties |> Map.get(:reflexive)
   #    tran = properties |> Map.get(:transitive)
 
-  #   # ensure the list is empty
+  #      # ensure the list is empty or raise
   #   unknown_props = Map.drop(properties, [:symmetric, :reflexive, :transitive]) 
   #   if unknown_props != %{} do
   #     # TODO : specific exeption
   #     raise RuntimeError, message: "#{unknown_props} contains unknown properties"
   #   end
 
-  #   fn (module, relation) ->
-  #     if symm do
-  #       symmetric(module, relation)
+  #   # Properties of the relation    
+
+  #   properties = []
+
+  #   quote do
+
+  #   defmodule RelationTest do
+
+  #     # TODO : attribute instead ??
+  #     relation = unquote(rel)
+
+  #     use ExUnit.Case
+  #     use ExUnitProperties
+
+  #     describe "#{unquote(module)}.#{unquote(rel)}" do
+  #         unquote(properties)
   #     end
-  #     if refl do
-  #       reflexive(module.generator(), relation)
-  #     end
-  #     if tran do
-  #       transitive(module, relation)
-  #     end
-  #   end
+
+  #   end end
 
   # end
 end
