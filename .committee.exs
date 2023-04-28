@@ -13,10 +13,11 @@ defmodule YourApp.Commit do
   #   @doc """
   #   This function auto-runs `mix format` on staged files.
   #   """
-  #   def pre_commit do
-  #     System.cmd("mix", ["format"] ++ staged_files([".ex", ".exs"]))
-  #     System.cmd("git", ["add"] ++ staged_files())
-  #   end
+  def pre_commit do
+    System.cmd("mix", ["format"] ++ staged_files([".ex", ".exs"]))
+    System.cmd("git", ["add"] ++ staged_files())
+  end
+
   #
   # If you want to test your example manually, you can run:
   #
