@@ -18,29 +18,36 @@ defmodule Relations.GeneratorTest do
 
       assert Code.eval_quoted(expr) == {[f1: :f1_code, f2: :f2_code], []}
     end
+  end
 
-    # TODO : how to test gen and check macros ???
+  describe "defgen/1" do
+    use ExUnitProperties
 
-    # test "accepts a keyword list of fields and returns clauses and body, usable with ExUnitProperties.gen macro" do
+    setup do
+      defmodule DynExample do
+        defstruct int: 0,
+                  mod: 8
 
-    #   clauses_and_body = Generator.clauses_and_body([f1: StreamData.integer(), f2:  StreamData.float() ])
+        use Relations.Generator
 
-    #   expr =  ExUnitProperties.gen({:all, [], clauses_and_body})
-    #     # end |> IO.inspect()
+        defgen(
+          int: integer(),
+          mod: integer() |> filter(fn x -> x <= 8 end)
+        )
+      end
 
-    #     # assert Code.eval(expr) == []
-    #   assert Code.eval_quoted(expr) == {[f1: :f1_code, f2: :f2_code], []}
+      # pass the name of the module to all tests
+      %{module: DynExample.__info__(:module)}
+    end
 
-    # end
-
-    # test "accepts a keyword list of fields and returns clauses and body, usable with ExUnitProperties.check macro" do
-    #   clauses_and_body = Generator.clauses_and_body([f1: StreamData.integer(), f2:  StreamData.float() ])
-
-    #   expr = quote(do: ExUnitProperties.check all unquote_splicing(clauses_and_body))
-
-    #      expr |> IO.inspect()
-
-    #   assert Code.eval_quoted(expr) == {[f1: :f1_code, f2: :f2_code], []}
-    # end
+    test "produces a gen/0 function in the module, usable in property checks", %{module: module} do
+      check all(v <- apply(module, :gen, [])) do
+        # Enable inspect if you want to see this working.
+        # |> IO.inspect()
+        [int: i, mod: m] = v
+        assert is_integer(i)
+        assert is_integer(m) and m <= 8
+      end
+    end
   end
 end

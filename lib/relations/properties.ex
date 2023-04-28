@@ -216,15 +216,11 @@ defmodule Relations.Properties do
   defmacro describe(generator, relation, properties \\ [])
            when is_list(properties)
            when is_map(properties) do
-    # properties |> IO.inspect()
-
-    # pass into a map for easy partial match.
-    properties = if is_list(properties), do: properties |> Enum.into(%{}), else: properties
-    inspect = Map.get(properties, :inspect, false)
+    inspect = Keyword.get(properties, :inspect, false)
 
     prop_checks =
       properties
-      |> Map.drop([:inspect])
+      |> Keyword.drop([:inspect])
       |> Enum.map(fn {k, e} ->
         case {k, e} do
           {:reflexive, true} ->
@@ -261,41 +257,18 @@ defmodule Relations.Properties do
     end
   end
 
-  # defmacro module(properties\\ []) when is_list(properties) do
-  #   properties |> Enum.into(%{}) |> all()
-  # end
+  defmacro module(generator, relation, properties \\ []) do
+    quote do
+      # TODO : many relations
+      defmodule RelationsTest do
+        # TODO : attribute instead ??
+        relation = unquote(relation)
 
-  # defmacro module(properties) when is_map(properties) do
-  #   symm = properties |> Map.get(:symmetric)
-  #   refl = properties |> Map.get(:reflexive)
-  #    tran = properties |> Map.get(:transitive)
+        use ExUnit.Case
+        use ExUnitProperties
 
-  #      # ensure the list is empty or raise
-  #   unknown_props = Map.drop(properties, [:symmetric, :reflexive, :transitive]) 
-  #   if unknown_props != %{} do
-  #     # TODO : specific exeption
-  #     raise RuntimeError, message: "#{unknown_props} contains unknown properties"
-  #   end
-
-  #   # Properties of the relation    
-
-  #   properties = []
-
-  #   quote do
-
-  #   defmodule RelationTest do
-
-  #     # TODO : attribute instead ??
-  #     relation = unquote(rel)
-
-  #     use ExUnit.Case
-  #     use ExUnitProperties
-
-  #     describe "#{unquote(module)}.#{unquote(rel)}" do
-  #         unquote(properties)
-  #     end
-
-  #   end end
-
-  # end
+        describe(unquote(generator), unquote(relation), unquote(properties))
+      end
+    end
+  end
 end

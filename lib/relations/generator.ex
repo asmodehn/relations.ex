@@ -14,7 +14,7 @@ defmodule Relations.Generator do
       require ExUnitProperties
       import StreamData
 
-      def generator() do
+      def gen() do
         ExUnitProperties.gen(all(unquote_splicing(clauses_and_body)))
       end
     end
