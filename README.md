@@ -5,12 +5,12 @@ An Elixir helper package to define relations and corresponding property tests
 the main macro defined here are :
 - defeq to define an equivalence relation,
 - defrel to define a relation (function with two arguments) with the properties it must satisfy,
-- reltest to test properties of a relation when running tests 
+- reltest to test properties of a relation when running `mix test`. 
 
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `nope` to your list of dependencies in `mix.exs`:
+by adding `relations` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
