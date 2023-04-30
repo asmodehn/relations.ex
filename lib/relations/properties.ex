@@ -132,6 +132,8 @@ defmodule Relations.Properties do
     end
   end
 
+  # TODO: antisymmetric
+
   def transitive_prop_descr(generator, relation) do
     rel_str = string_or_inspect(relation)
 
@@ -216,6 +218,10 @@ defmodule Relations.Properties do
   defmacro describe(generator, relation, properties \\ [])
            when is_list(properties)
            when is_map(properties) do
+    # If it is a function that needs to be called (because of late definition for instance)
+    # then we call it and quote its result.
+    # generator = if is_function(unquote(generator), 0), do: quote(unquote(generator)()), else: generator
+
     inspect = Keyword.get(properties, :inspect, false)
 
     prop_checks =
@@ -257,18 +263,7 @@ defmodule Relations.Properties do
     end
   end
 
-  defmacro module(generator, relation, properties \\ []) do
-    quote do
-      # TODO : many relations
-      defmodule RelationsTest do
-        # TODO : attribute instead ??
-        relation = unquote(relation)
-
-        use ExUnit.Case
-        use ExUnitProperties
-
-        describe(unquote(generator), unquote(relation), unquote(properties))
-      end
-    end
-  end
+  # defmacro describe(generator, relation, properties ) do
+  #   IO.inspect([generator, relation, properties])
+  # end
 end

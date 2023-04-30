@@ -1,25 +1,18 @@
 defmodule Example do
+  @modulus 8
 
+  defstruct int: 0
 
-	defstruct int: 0,
-	          mod: 8
+  use Relations.Generator
 
+  defgen(int: positive_integer())
 
+  # TODO : doctests
 
-	use Relations.Generator
+  use Relations
 
-	defgen int: integer(),
-		   mod: integer() |> filter(fn x -> x <= 8 end)
-
-
-	# TODO : doctests
-
-	use Relations
-
-	# defrel equal?(l, r), reflexive: true, symmetric: true, transitive: true do
-	# 	rem(l.int, l.mod) == rem(r.div, r.mod)
-	# end
-
-
-
+  defrel congruent?(l, r), reflexive: true, symmetric: true, transitive: true do
+    # congruent if they have same remainder
+    rem(l.int, @modulus) == rem(r.int, @modulus)
+  end
 end

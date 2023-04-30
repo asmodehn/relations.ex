@@ -8,15 +8,32 @@ defmodule Relations.GeneratorTest do
   require StreamData
 
   describe "clauses_and_body/1" do
-    test "accepts a keyword list of fields and returns clauses and body, usable with with/1 " do
-      clauses_and_body = Generator.clauses_and_body(f1: :f1_code, f2: :f2_code)
+    setup do
+      defmodule FakeMod do
+        defstruct f1: nil,
+                  f2: nil
+      end
+
+      # pass the name of the module to all tests
+      %{module: FakeMod.__info__(:module)}
+    end
+
+    test "accepts a keyword list of fields and returns clauses and body, usable with with/1 ", %{
+      module: module
+    } do
+      clauses_and_body = Generator.clauses_and_body(module, f1: :f1_code, f2: :f2_code)
 
       expr =
         quote do
           with unquote_splicing(clauses_and_body)
         end
 
-      assert Code.eval_quoted(expr) == {[f1: :f1_code, f2: :f2_code], []}
+      # pattern match works
+      {%^module{f1: :f1_code, f2: :f2_code} = struct, []} = Code.eval_quoted(expr)
+
+      # struct is usable as expected
+      assert struct.f1 == :f1_code
+      assert struct.f2 == :f2_code
     end
   end
 
@@ -32,7 +49,7 @@ defmodule Relations.GeneratorTest do
 
         defgen(
           int: integer(),
-          mod: integer() |> filter(fn x -> x <= 8 end)
+          mod: integer(1..8)
         )
       end
 
@@ -40,13 +57,13 @@ defmodule Relations.GeneratorTest do
       %{module: DynExample.__info__(:module)}
     end
 
-    test "produces a gen/0 function in the module, usable in property checks", %{module: module} do
+    test "produces a gen/0 function in module, usable in property checks", %{module: module} do
       check all(v <- apply(module, :gen, [])) do
         # Enable inspect if you want to see this working.
-        # |> IO.inspect()
-        [int: i, mod: m] = v
+        # v |> IO.inspect()
+        %^module{int: i, mod: m} = v
         assert is_integer(i)
-        assert is_integer(m) and m <= 8
+        assert is_integer(m) and m > 0 and m <= 8
       end
     end
   end

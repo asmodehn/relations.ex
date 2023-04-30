@@ -6,6 +6,6 @@ defmodule GenExample do
 
   defgen(
     int: integer(),
-    mod: integer() |> filter(fn x -> x <= 8 end)
+    mod: integer(1..8)
   )
 end
