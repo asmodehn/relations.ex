@@ -16,16 +16,25 @@ defmodule Relations.Generator do
     # We need a module here to make the function usable in the outerscope
     # during macro expansion.
     quote do
-      defmodule All do
+      defmodule Generator do
         require ExUnitProperties
         import StreamData
 
-        def gen() do
+        def all() do
           ExUnitProperties.gen(all(unquote_splicing(clauses_and_body)))
+        end
+
+        def all_except(l) when is_list(l) do
+          all() |> StreamData.filter(fn x -> x in l end)
+        end
+
+        def all_except(i) do
+          all() |> StreamData.filter(fn x -> x != i end)
         end
       end
 
-      defdelegate gen(), to: All, as: :gen
+      defdelegate all(), to: Generator, as: :all
+      defdelegate all_except(l), to: Generator, as: :all_except
     end
 
     # unquote(args) |> Enum.into(%unquote(caller){})

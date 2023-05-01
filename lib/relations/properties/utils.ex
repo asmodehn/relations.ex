@@ -7,3 +7,9 @@ defmodule Relations.Properties.Utils do
     end
   end
 end
+
+defimpl String.Chars, for: StreamData do
+  def to_string(sd) do
+    sd |> inspect()
+  end
+end

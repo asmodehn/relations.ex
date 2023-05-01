@@ -6,7 +6,7 @@ defmodule GenExampleTest do
   use ExUnitProperties
 
   property "generator property test" do
-    check all(v <- GenExample.gen()) do
+    check all(v <- GenExample.all()) do
       # v |> IO.inspect()
       %GenExample{int: i, mod: m} = v
       assert is_integer(i)

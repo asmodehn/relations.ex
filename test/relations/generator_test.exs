@@ -57,8 +57,8 @@ defmodule Relations.GeneratorTest do
       %{module: DynExample.__info__(:module)}
     end
 
-    test "produces a gen/0 function in module, usable in property checks", %{module: module} do
-      check all(v <- apply(module, :gen, [])) do
+    test "produces a all/0 function in module, usable in property checks", %{module: module} do
+      check all(v <- apply(module, :all, [])) do
         # Enable inspect if you want to see this working.
         # v |> IO.inspect()
         %^module{int: i, mod: m} = v

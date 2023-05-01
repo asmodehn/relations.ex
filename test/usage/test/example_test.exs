@@ -10,7 +10,7 @@ defmodule ExampleTest do
   # reltest Example, &equal/2
 
   property "generator property test" do
-    check all(v <- Example.gen()) do
+    check all(v <- Example.all()) do
       %Example{int: i} = v
       assert is_integer(i)
     end
@@ -18,15 +18,9 @@ defmodule ExampleTest do
 
   require Relations.Properties
 
-  describe "&Example.congruent?/2 for Example.gen()" do
-    Relations.Properties.reflexive(Example.gen(), &Example.congruent?/2, descr: "is reflexive")
-    Relations.Properties.symmetric(Example.gen(), &Example.congruent?/2, descr: "is symmetric")
-    Relations.Properties.transitive(Example.gen(), &Example.congruent?/2, descr: "is transitive")
+  describe "&Example.congruent?/2 for Example.all()" do
+    Relations.Properties.reflexive(Example.all(), &Example.congruent?/2, descr: "is reflexive")
+    Relations.Properties.symmetric(Example.all(), &Example.congruent?/2, descr: "is symmetric")
+    Relations.Properties.transitive(Example.all(), &Example.congruent?/2, descr: "is transitive")
   end
-
-  require Relations
-
-  Relations.reltest(Example)
-  # Relations.check_equivalence &Example.congruent?/2, for: Example.all()
-  # TODO MAYBE ?
 end

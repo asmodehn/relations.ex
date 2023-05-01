@@ -177,18 +177,18 @@ defmodule Relations.Properties do
     "#{rel_str} for #{gen_str}"
   end
 
-  defmacro describe(generator, relation, properties \\ [])
-           when is_list(properties)
-           when is_map(properties) do
+  defmacro describe(generator, relation, properties \\ [descr: nil, inspect: false])
+           when is_list(properties) do
     # If it is a function that needs to be called (because of late definition for instance)
     # then we call it and quote its result.
     # generator = if is_function(unquote(generator), 0), do: quote(unquote(generator)()), else: generator
 
     inspect = Keyword.get(properties, :inspect, false)
+    descr = Keyword.get(properties, :descr)
 
-    prop_checks =
+    quoted_check =
       properties
-      |> Keyword.drop([:inspect])
+      |> Keyword.drop([:inspect, :descr])
       |> Enum.map(fn {k, e} ->
         case {k, e} do
           {:reflexive, true} ->
@@ -218,9 +218,17 @@ defmodule Relations.Properties do
         end
       end)
 
-    quote location: :keep do
-      describe Relations.Properties.describe_descr(unquote(generator), unquote(relation)) do
-        unquote(prop_checks)
+    if descr do
+      quote do
+        describe unquote(descr) do
+          unquote(quoted_check)
+        end
+      end
+    else
+      quote do
+        describe Relations.Properties.describe_descr(unquote(generator), unquote(relation)) do
+          unquote(quoted_check)
+        end
       end
     end
   end
