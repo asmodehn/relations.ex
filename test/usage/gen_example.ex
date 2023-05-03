@@ -5,7 +5,9 @@ defmodule GenExample do
   use Relations.Generator
 
   defgen(
-    int: integer(),
-    mod: integer(1..8)
+    all(
+      int: integer(),
+      mod: integer(1..8)
+    )
   )
 end

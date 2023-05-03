@@ -11,7 +11,8 @@ defmodule Relations do
 
   defmacro __using__(_opts) do
     quote do
-      import Relations.CompiledTests, only: [defrel: 3, reltest: 2]
+      require Relations.CompiledTests
+      import Relations.CompiledTests, only: [defrel: 3, reltest: 2, reltest: 1]
       # TODO : defeq as specific "helper" shortcut to these
     end
   end

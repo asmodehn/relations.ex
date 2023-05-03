@@ -5,7 +5,7 @@ defmodule Relations.Generator do
     end
   end
 
-  defmacro defgen(fields) do
+  defmacro defgen({name, _ctx, [fields]}) when is_list(fields) do
     module = __CALLER__.module
 
     clauses_and_body = clauses_and_body(module, fields)
@@ -20,21 +20,12 @@ defmodule Relations.Generator do
         require ExUnitProperties
         import StreamData
 
-        def all() do
+        def unquote(name)() do
           ExUnitProperties.gen(all(unquote_splicing(clauses_and_body)))
-        end
-
-        def all_except(l) when is_list(l) do
-          all() |> StreamData.filter(fn x -> x in l end)
-        end
-
-        def all_except(i) do
-          all() |> StreamData.filter(fn x -> x != i end)
         end
       end
 
-      defdelegate all(), to: Generator, as: :all
-      defdelegate all_except(l), to: Generator, as: :all_except
+      defdelegate unquote(name)(), to: Generator, as: unquote(name)
     end
 
     # unquote(args) |> Enum.into(%unquote(caller){})

@@ -48,8 +48,10 @@ defmodule Relations.GeneratorTest do
         use Relations.Generator
 
         defgen(
-          int: integer(),
-          mod: integer(1..8)
+          myname(
+            int: integer(),
+            mod: integer(1..8)
+          )
         )
       end
 
@@ -57,8 +59,10 @@ defmodule Relations.GeneratorTest do
       %{module: DynExample.__info__(:module)}
     end
 
-    test "produces a all/0 function in module, usable in property checks", %{module: module} do
-      check all(v <- apply(module, :all, [])) do
+    test "produces a named function with arity 0 in module, usable in property checks", %{
+      module: module
+    } do
+      check all(v <- apply(module, :myname, [])) do
         # Enable inspect if you want to see this working.
         # v |> IO.inspect()
         %^module{int: i, mod: m} = v

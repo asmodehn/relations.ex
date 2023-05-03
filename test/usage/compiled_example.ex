@@ -5,7 +5,7 @@ defmodule CompiledExample do
 
   use Relations.Generator
 
-  defgen(int: positive_integer())
+  defgen(all(int: positive_integer()))
 
   # TODO : doctests
 
