@@ -1,6 +1,32 @@
 defmodule Relations.Properties.Reflexive do
   alias Relations.Properties.Utils
 
+  def quoted_property(generator, relation, opts \\ [inspect: false]) do
+    inspect = Keyword.get(opts, :inspect)
+    descr = Keyword.get(opts, :descr, nil)
+
+    quoted_check =
+      quoted_check(
+        generator,
+        relation,
+        inspect: inspect
+      )
+
+    if descr do
+      quote do
+        property unquote(descr) do
+          unquote(quoted_check)
+        end
+      end
+    else
+      quote do
+        property Relations.Properties.Reflexive.descr(unquote(generator), unquote(relation)) do
+          unquote(quoted_check)
+        end
+      end
+    end
+  end
+
   def quoted_check(generator, relation, inspect: inspect) do
     if inspect do
       quote do

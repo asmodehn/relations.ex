@@ -9,9 +9,9 @@ defmodule Relations.Generator do
     module = __CALLER__.module
 
     clauses_and_body = clauses_and_body(module, fields)
-    # [do: body] = List.last(clauses_and_body)
 
-    # IO.inspect("In macro defgen for #{module}")
+    # TODO : check if Generator module is defined...
+    # => we need a module-level macro...
 
     # We need a module here to make the function usable in the outerscope
     # during macro expansion.

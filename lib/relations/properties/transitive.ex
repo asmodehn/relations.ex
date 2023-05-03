@@ -1,6 +1,32 @@
 defmodule Relations.Properties.Transitive do
   alias Relations.Properties.Utils
 
+  def quoted_property(generator, relation, opts \\ [descr: nil, inspect: false]) do
+    inspect = Keyword.get(opts, :inspect)
+    descr = Keyword.get(opts, :descr)
+
+    quoted_check =
+      quoted_check(
+        generator,
+        relation,
+        inspect: inspect
+      )
+
+    if descr do
+      quote do
+        property unquote(descr) do
+          unquote(quoted_check)
+        end
+      end
+    else
+      quote do
+        property Relations.Properties.Transitive.descr(unquote(generator), unquote(relation)) do
+          unquote(quoted_check)
+        end
+      end
+    end
+  end
+
   def quoted_check(generator, relation, inspect: inspect) do
     if inspect do
       quote do
@@ -9,7 +35,7 @@ defmodule Relations.Properties.Transitive do
                 b <- unquote(generator),
                 c <- unquote(generator)
               ) do
-          IO.write(Relations.Properties.transitive_inspect_descr(a, b, c, unquote(relation)))
+          IO.write(Relations.Properties.Transitive.inspect_descr(a, b, c, unquote(relation)))
           # pass as relation doesnt have to be true for all values...
           res =
             if unquote(relation).(a, b) and unquote(relation).(b, c),

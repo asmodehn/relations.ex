@@ -1,6 +1,32 @@
 defmodule Relations.Properties.Universal do
   alias Relations.Properties.Utils
 
+  def quoted_property(generator, relation, opts \\ [inspect: false]) do
+    inspect = Keyword.get(opts, :inspect)
+    descr = Keyword.get(opts, :descr, nil)
+
+    quoted_check =
+      quoted_check(
+        generator,
+        relation,
+        inspect: inspect
+      )
+
+    if descr do
+      quote do
+        property unquote(descr) do
+          unquote(quoted_check)
+        end
+      end
+    else
+      quote do
+        property Relations.Properties.Universal.descr(unquote(generator), unquote(relation)) do
+          unquote(quoted_check)
+        end
+      end
+    end
+  end
+
   def quoted_check(generator, relation, inspect: inspect) do
     if inspect do
       quote do
@@ -8,7 +34,7 @@ defmodule Relations.Properties.Universal do
                 l <- unquote(generator),
                 r <- unquote(generator)
               ) do
-          IO.write(inspect_descr(l, r, unquote(relation)))
+          IO.write(Relations.Properties.Universal.inspect_descr(l, r, unquote(relation)))
           res = unquote(relation).(l, r)
           IO.inspect(res)
           assert res

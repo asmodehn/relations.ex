@@ -1,6 +1,32 @@
 defmodule Relations.Properties.Identity do
   alias Relations.Properties.Utils
 
+  def quoted_property(generator, relation, opts \\ [inspect: false]) do
+    inspect = Keyword.get(opts, :inspect)
+    descr = Keyword.get(opts, :descr, nil)
+
+    quoted_check =
+      quoted_check(
+        generator,
+        relation,
+        inspect: inspect
+      )
+
+    if descr do
+      quote do
+        property unquote(descr) do
+          unquote(quoted_check)
+        end
+      end
+    else
+      quote do
+        property Relations.Properties.Identity.descr(unquote(generator), unquote(relation)) do
+          unquote(quoted_check)
+        end
+      end
+    end
+  end
+
   def quoted_check(generator, relation, inspect: inspect) do
     if inspect do
       quote do
@@ -9,7 +35,7 @@ defmodule Relations.Properties.Identity do
                 i <- unquote(generator),
                 o <- unquote(generator) |> StreamData.filter(fn x -> x != i end)
               ) do
-          IO.write(inspect_descr(i, o, unquote(relation)))
+          IO.write(Relations.Properties.Identity.inspect_descr(i, o, unquote(relation)))
           res = unquote(relation).(i, i) and not unquote(relation).(i, o)
           IO.inspect(res)
           assert res

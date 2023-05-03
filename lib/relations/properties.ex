@@ -12,160 +12,40 @@ defmodule Relations.Properties do
   alias Relations.Properties.{Empty, Universal, Identity, Reflexive, Symmetric, Transitive}
 
   defmacro empty(generator, relation, opts \\ [inspect: false]) do
-    inspect = Keyword.get(opts, :inspect)
-    descr = Keyword.get(opts, :descr, nil)
-
-    quoted_check =
-      Empty.quoted_check(
-        generator,
-        relation,
-        inspect: inspect
-      )
-
-    if descr do
-      quote do
-        property unquote(descr) do
-          unquote(quoted_check)
-        end
-      end
-    else
-      quote do
-        property Empty.descr(unquote(generator), unquote(relation)) do
-          unquote(quoted_check)
-        end
-      end
+    quote do
+      unquote(Empty.quoted_property(generator, relation, opts))
     end
   end
 
   defmacro universal(generator, relation, opts \\ [inspect: false]) do
-    inspect = Keyword.get(opts, :inspect)
-    descr = Keyword.get(opts, :descr, nil)
-
-    quoted_check =
-      Universal.quoted_check(
-        generator,
-        relation,
-        inspect: inspect
-      )
-
-    if descr do
-      quote do
-        property unquote(descr) do
-          unquote(quoted_check)
-        end
-      end
-    else
-      quote do
-        property Universal.descr(unquote(generator), unquote(relation)) do
-          unquote(quoted_check)
-        end
-      end
+    quote do
+      unquote(Universal.quoted_property(generator, relation, opts))
     end
   end
 
   defmacro identity(generator, relation, opts \\ [inspect: false]) do
-    inspect = Keyword.get(opts, :inspect)
-    descr = Keyword.get(opts, :descr, nil)
-
-    quoted_check =
-      Identity.quoted_check(
-        generator,
-        relation,
-        inspect: inspect
-      )
-
-    if descr do
-      quote do
-        property unquote(descr) do
-          unquote(quoted_check)
-        end
-      end
-    else
-      quote do
-        property Identity.descr(unquote(generator), unquote(relation)) do
-          unquote(quoted_check)
-        end
-      end
+    quote do
+      unquote(Identity.quoted_property(generator, relation, opts))
     end
   end
 
   defmacro reflexive(generator, relation, opts \\ [inspect: false]) do
-    inspect = Keyword.get(opts, :inspect)
-    descr = Keyword.get(opts, :descr, nil)
-
-    quoted_check =
-      Reflexive.quoted_check(
-        generator,
-        relation,
-        inspect: inspect
-      )
-
-    if descr do
-      quote do
-        property unquote(descr) do
-          unquote(quoted_check)
-        end
-      end
-    else
-      quote do
-        property Reflexive.descr(unquote(generator), unquote(relation)) do
-          unquote(quoted_check)
-        end
-      end
+    quote do
+      unquote(Reflexive.quoted_property(generator, relation, opts))
     end
   end
 
   defmacro symmetric(generator, relation, opts \\ [descr: nil, inspect: false]) do
-    inspect = Keyword.get(opts, :inspect)
-    descr = Keyword.get(opts, :descr)
-
-    quoted_check =
-      Symmetric.quoted_check(
-        generator,
-        relation,
-        inspect: inspect
-      )
-
-    if descr do
-      quote do
-        property unquote(descr) do
-          unquote(quoted_check)
-        end
-      end
-    else
-      quote do
-        property Symmetric.descr(unquote(generator), unquote(relation)) do
-          unquote(quoted_check)
-        end
-      end
+    quote do
+      unquote(Symmetric.quoted_property(generator, relation, opts))
     end
   end
 
   # TODO: antisymmetric
 
   defmacro transitive(generator, relation, opts \\ [descr: nil, inspect: false]) do
-    inspect = Keyword.get(opts, :inspect)
-    descr = Keyword.get(opts, :descr)
-
-    quoted_check =
-      Transitive.quoted_check(
-        generator,
-        relation,
-        inspect: inspect
-      )
-
-    if descr do
-      quote do
-        property unquote(descr) do
-          unquote(quoted_check)
-        end
-      end
-    else
-      quote do
-        property Transitive.descr(unquote(generator), unquote(relation)) do
-          unquote(quoted_check)
-        end
-      end
+    quote do
+      unquote(Transitive.quoted_property(generator, relation, opts))
     end
   end
 
