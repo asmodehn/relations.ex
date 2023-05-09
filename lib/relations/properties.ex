@@ -100,9 +100,9 @@ defmodule Relations.Properties do
 
     if descr do
       quote do
-        describe unquote(descr) do
-          unquote(quoted_check)
-        end
+        # describe unquote(descr) do
+        unquote(quoted_check)
+        # end
       end
     else
       quote do

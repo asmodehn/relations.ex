@@ -154,10 +154,6 @@ defmodule Relations.CompiledTests do
               []
             )
 
-          # CURRENT : Elixir.CompiledExample.RelationsTest property congruent? for Elixir.CompiledExample.All is transitive (1.7ms) [L#14]
-          # TODO    : Elixir.CompiledExample.Test: property transitivity for Elixir.CompiledExample.congruent?/2 (1.7ms) [L#14]
-          # Note : the All generator can be implicit in comments/outputs...
-
           def unquote(t)(_) do
             # calling reltest_name test from relationtest module, with module and relation in context
 

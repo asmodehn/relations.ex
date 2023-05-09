@@ -9,13 +9,13 @@ defmodule Relations.GeneratorTest do
 
   describe "clauses_and_body/1" do
     setup do
-      defmodule FakeMod do
+      defmodule FakeModC do
         defstruct f1: nil,
                   f2: nil
       end
 
       # pass the name of the module to all tests
-      %{module: FakeMod.__info__(:module)}
+      %{module: FakeModC.__info__(:module)}
     end
 
     test "accepts a keyword list of fields and returns clauses and body, usable with with/1 ", %{
@@ -37,37 +37,155 @@ defmodule Relations.GeneratorTest do
     end
   end
 
-  describe "defgen/1" do
-    use ExUnitProperties
-
+  describe "defstream/2" do
     setup do
-      defmodule DynExample do
+      defmodule FakeModS do
+        defstruct f1: nil,
+                  f2: nil
+
+        use Relations.Generator
+
+        defstream(all(f1: member_of([:f1_code]), f2: member_of([:f2_code])))
+      end
+
+      # pass the name of the module to all tests
+      %{module: FakeModS.__info__(:module)}
+    end
+
+    test "builds a definition providing a stream of struct for the module with these fields", %{
+      module: module
+    } do
+      # Note Here we need to rely on Kernel struct because module is defined dynamically.
+      assert module.all() |> Enum.take(2) == [
+               Kernel.struct(module, f1: :f1_code, f2: :f2_code),
+               Kernel.struct(module, f1: :f1_code, f2: :f2_code)
+             ]
+    end
+  end
+
+  describe "generators/1 with one definition" do
+    setup do
+      defmodule OneGenExample do
         defstruct int: 0,
                   mod: 8
 
         use Relations.Generator
 
-        defgen(
-          myname(
-            int: integer(),
-            mod: integer(1..8)
-          )
-        )
+        generators do
+          def myname do
+            ExUnitProperties.gen all(
+                                   i <- integer(),
+                                   m <- integer(1..8)
+                                 ) do
+              %OneGenExample{int: i, mod: m}
+            end
+          end
+        end
       end
 
       # pass the name of the module to all tests
-      %{module: DynExample.__info__(:module)}
+      %{module: OneGenExample.__info__(:module)}
     end
 
     test "produces a named function with arity 0 in module, usable in property checks", %{
       module: module
     } do
-      check all(v <- apply(module, :myname, [])) do
+      ExUnitProperties.check all(v <- apply(module, :myname, [])) do
         # Enable inspect if you want to see this working.
         # v |> IO.inspect()
         %^module{int: i, mod: m} = v
         assert is_integer(i)
         assert is_integer(m) and m > 0 and m <= 8
+      end
+    end
+  end
+
+  describe "generators/1 with one defstream" do
+    setup do
+      defmodule DefStreamExample do
+        defstruct int: 0,
+                  mod: 8
+
+        use Relations.Generator
+
+        generators do
+          defstream(
+            myname(
+              int: integer(),
+              mod: integer(1..8)
+            )
+          )
+        end
+      end
+
+      # pass the name of the module to all tests
+      %{module: DefStreamExample.__info__(:module)}
+    end
+
+    test "produces one named functions with arity 0 in module, usable in property checks", %{
+      module: module
+    } do
+      ExUnitProperties.check all(v <- apply(module, :myname, [])) do
+        # Enable inspect if you want to see this working.
+        # v |> IO.inspect()
+        %^module{int: i, mod: m} = v
+        assert is_integer(i)
+        assert is_integer(m) and m > 0 and m <= 8
+      end
+    end
+  end
+
+  describe "generators/1 with multiple definition" do
+    setup do
+      defmodule MultiDefExample do
+        defstruct int: 0,
+                  mod: 8
+
+        use Relations.Generator
+
+        generators do
+          def myname() do
+            ExUnitProperties.gen all(
+                                   i <- integer(),
+                                   m <- integer(1..8)
+                                 ) do
+              %MultiDefExample{int: i, mod: m}
+            end
+          end
+
+          def anothername() do
+            ExUnitProperties.gen all(
+                                   i <- integer(),
+                                   m <- integer(1..7)
+                                 ) do
+              %MultiDefExample{int: i, mod: m}
+            end
+          end
+        end
+      end
+
+      # pass the name of the module to all tests
+      %{module: MultiDefExample.__info__(:module)}
+    end
+
+    @tag :onlyme
+    test "produces two named functions with arity 0 in module, usable in property checks", %{
+      module: module
+    } do
+      ExUnitProperties.check all(v <- apply(module, :myname, [])) do
+        # Enable inspect if you want to see this working.
+        # v |> IO.inspect()
+        %^module{int: i, mod: m} = v
+        assert is_integer(i)
+        assert is_integer(m) and m > 0 and m <= 8
+      end
+
+      ExUnitProperties.check all(v <- apply(module, :anothername, [])) do
+        # Enable inspect if you want to see this working.
+        # v |> IO.inspect()
+        %^module{int: i, mod: m} = v
+        assert is_integer(i)
+        assert is_integer(m) and m > 0 and m <= 7
       end
     end
   end
