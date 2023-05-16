@@ -12,8 +12,12 @@ defmodule CompiledExampleTest do
   require Relations.CompiledTests
 
   Relations.CompiledTests.reltest(CompiledExample)
+
   # Relations.check_equivalence &CompiledExample.congruent?/2, for: Example.all()
   # TODO MAYBE ?
+
+  # OR Calling the properties in the CompiledExample.Tests module directly with ExUnit somehow ?
+  # ExUnit.run([CompiledExample.Test]) |> IO.inspect()
 
   # This should trigger a custom Relations.UnknownError on compilation
   # Relations.CompiledTests.reltest(Example)

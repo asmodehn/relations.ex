@@ -7,7 +7,7 @@ defmodule Relations.Properties do
   and a function returning a quoted block with the property and a description string.
   """
 
-  import Relations.Properties.Utils
+  alias Relations.Properties.Utils
 
   alias Relations.Properties.{Empty, Universal, Identity, Reflexive, Symmetric, Transitive}
 
@@ -50,9 +50,9 @@ defmodule Relations.Properties do
   end
 
   def describe_descr(generator, relation) do
-    rel_str = string_or_inspect(relation)
+    rel_str = Utils.string_or_inspect(relation)
 
-    gen_str = string_or_inspect(generator)
+    gen_str = Utils.string_or_inspect(generator)
 
     "#{rel_str} for #{gen_str}"
   end
@@ -74,21 +74,21 @@ defmodule Relations.Properties do
           {:reflexive, true} ->
             quote do:
                     Relations.Properties.reflexive(unquote(generator), unquote(relation),
-                      descr: "is reflexive",
+                      descr: "#{Utils.string_or_inspect(unquote(relation))} is reflexive",
                       inspect: unquote(inspect)
                     )
 
           {:symmetric, true} ->
             quote do:
                     Relations.Properties.symmetric(unquote(generator), unquote(relation),
-                      descr: "is symmetric",
+                      descr: "#{Utils.string_or_inspect(unquote(relation))} is symmetric",
                       inspect: unquote(inspect)
                     )
 
           {:transitive, true} ->
             quote do:
                     Relations.Properties.transitive(unquote(generator), unquote(relation),
-                      descr: "is transitive",
+                      descr: "#{Utils.string_or_inspect(unquote(relation))} is transitive",
                       inspect: unquote(inspect)
                     )
 

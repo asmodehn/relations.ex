@@ -150,7 +150,7 @@ defmodule Relations.CompiledTests do
               __MODULE__,
               env_file,
               env_line,
-              Properties.Utils.string_or_inspect(rel_proptest_module),
+              Properties.Utils.string_or_inspect(module),
               reltest_name,
               []
             )
