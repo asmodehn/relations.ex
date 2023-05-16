@@ -1,11 +1,21 @@
 defmodule CompiledExample do
+  @moduledoc false
+
   @modulus 8
 
   defstruct int: 0
 
   use Relations.Generator
 
-  defgen(all(int: positive_integer()))
+  generators do
+    def all() do
+      ExUnitProperties.gen all(i <- positive_integer()) do
+        %CompiledExample{int: i}
+      end
+    end
+
+    def other(), do: nil
+  end
 
   # TODO : doctests
 

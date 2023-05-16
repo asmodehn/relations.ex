@@ -1,4 +1,6 @@
 defmodule Relations.CompiledTests do
+  @moduledoc false
+
   alias Relations.Properties
 
   defmodule UndefinedError do
@@ -47,7 +49,7 @@ defmodule Relations.CompiledTests do
   """
   @spec ensure!() :: no_return()
   defmacro ensure!() do
-    module = __CALLER__.module |> IO.inspect()
+    module = __CALLER__.module
     tests_mod = Module.concat([module, RelationTest])
 
     quote do
@@ -67,7 +69,7 @@ defmodule Relations.CompiledTests do
   defmacro defrel(definition, properties \\ [inspect: false], do: body) do
     module = __CALLER__.module
 
-    gen_module = Module.concat([module, Generator]) |> IO.inspect()
+    gen_module = Module.concat([module, Generator])
 
     # IO.inspect("In macro defrel for #{module}")
 
@@ -89,7 +91,6 @@ defmodule Relations.CompiledTests do
       Keyword.update(properties, :descr, descr, fn d ->
         if is_nil(d), do: descr, else: d
       end)
-      |> IO.inspect()
 
     # Properties of the relation 
     test_module =

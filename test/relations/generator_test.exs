@@ -63,6 +63,49 @@ defmodule Relations.GeneratorTest do
     end
   end
 
+  describe "quoted_gen_body_delegates/2" do
+    setup do
+      defmodule FakeModG do
+        defstruct f1: nil,
+                  f2: nil
+      end
+
+      # pass the name of the module to all tests
+      %{module: FakeModG.__info__(:module)}
+    end
+
+    test "returns expected quoted expression for a def" do
+      {qdlg, qdef} =
+        Generator.quoted_gen_body_delegates(
+          quote do
+            def myfun(), do: 42
+          end,
+          caller: %{module: DynTestModule},
+          nested: Nested
+        )
+
+      dy_test_module =
+        quote do
+          defmodule DynTestModule do
+            defmodule Nested do
+              unquote(qdef)
+            end
+
+            unquote(qdlg)
+          end
+
+          # assertion in quote for dynamic test
+          {
+            DynTestModule.Nested.myfun(),
+            # also checking that the delegate works as expected
+            DynTestModule.myfun()
+          }
+        end
+
+      {{42, 42}, []} = Code.eval_quoted(dy_test_module)
+    end
+  end
+
   describe "generators/1 with one definition" do
     setup do
       defmodule OneGenExample do
@@ -135,7 +178,7 @@ defmodule Relations.GeneratorTest do
     end
   end
 
-  describe "generators/1 with multiple definition" do
+  describe "generators/1 with various definition" do
     setup do
       defmodule MultiDefExample do
         defstruct int: 0,
@@ -144,14 +187,12 @@ defmodule Relations.GeneratorTest do
         use Relations.Generator
 
         generators do
-          def myname() do
-            ExUnitProperties.gen all(
-                                   i <- integer(),
-                                   m <- integer(1..8)
-                                 ) do
-              %MultiDefExample{int: i, mod: m}
-            end
-          end
+          defstream(
+            myname(
+              int: integer(),
+              mod: integer(1..8)
+            )
+          )
 
           def anothername() do
             ExUnitProperties.gen all(
@@ -168,7 +209,6 @@ defmodule Relations.GeneratorTest do
       %{module: MultiDefExample.__info__(:module)}
     end
 
-    @tag :onlyme
     test "produces two named functions with arity 0 in module, usable in property checks", %{
       module: module
     } do

@@ -1,11 +1,15 @@
 defmodule Example do
+  @moduledoc false
+
   @modulus 8
 
   defstruct int: 0
 
   use Relations.Generator
 
-  defgen(all(int: positive_integer()))
+  generators do
+    defstream(all(int: positive_integer()))
+  end
 
   # TODO : doctests
 
