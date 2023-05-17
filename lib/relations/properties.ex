@@ -116,4 +116,80 @@ defmodule Relations.Properties do
   # defmacro describe(generator, relation, properties ) do
   #   IO.inspect([generator, relation, properties])
   # end
+
+  #  TODO: multiple various properties in one module
+  #  def quoted_module(properties) when is_list(properties) do
+  #
+  #    properties |> IO.inspect()
+  #
+  #    quote do
+  #        defmodule Properties do
+  #          @moduledoc false
+  #
+  #          require Relations.Properties
+  #
+  #          use ExUnit.Case
+  #          use ExUnitProperties
+  #
+  #          unquote_splicing(properties)
+  #
+  #        end
+  #      end
+  #  end
+
+  defmacro check(module, _opts \\ []) do
+    caller = __CALLER__
+
+    require =
+      if is_atom(Macro.expand(module, caller)) do
+        quote do
+          require unquote(module)
+        end
+      end
+
+    prop_module_plural =
+      quote do
+        ExUnit.plural_rule(
+          Utils.string_or_inspect(Module.concat([unquote(module), Properties])),
+          Utils.string_or_inspect(Module.concat([unquote(module), Properties]))
+        )
+      end
+
+    tests =
+      quote bind_quoted: [
+              module: module,
+              env_line: caller.line,
+              env_file: caller.file
+            ] do
+        prop_module = Module.concat([module, Properties])
+
+        # gathering relation property tests
+        for {reltest_name, one} <-
+              prop_module.__info__(:functions)
+              |> Enum.filter(fn {n, a} ->
+                n != :relation and
+                  not String.starts_with?(Atom.to_string(n), "__")
+              end) do
+          t =
+            ExUnit.Case.register_test(
+              __MODULE__,
+              env_file,
+              env_line,
+              Utils.string_or_inspect(prop_module),
+              reltest_name,
+              []
+            )
+
+          def unquote(t)(_) do
+            # calling reltest_name test from relationtest module, with module and relation in context
+
+            apply(unquote(prop_module), unquote(reltest_name), [
+              %{module: unquote(module)}
+            ])
+          end
+        end
+      end
+
+    [require, prop_module_plural, tests]
+  end
 end

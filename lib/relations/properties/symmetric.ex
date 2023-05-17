@@ -32,10 +32,10 @@ defmodule Relations.Properties.Symmetric do
   def quoted_check(generator, relation, inspect: inspect) do
     if inspect do
       quote do
-        check all(
-                a <- unquote(generator),
-                b <- unquote(generator)
-              ) do
+        ExUnitProperties.check all(
+                                 a <- unquote(generator),
+                                 b <- unquote(generator)
+                               ) do
           IO.write(Relations.Properties.Symmetric.inspect_descr(a, b, unquote(relation)))
           # pass as relation doesnt have to be true for all values...
           res = if unquote(relation).(a, b), do: unquote(relation).(b, a), else: true
@@ -45,10 +45,10 @@ defmodule Relations.Properties.Symmetric do
       end
     else
       quote do
-        check all(
-                a <- unquote(generator),
-                b <- unquote(generator)
-              ) do
+        ExUnitProperties.check all(
+                                 a <- unquote(generator),
+                                 b <- unquote(generator)
+                               ) do
           # pass as relation doesnt have to be true for all values...
           # TODO : more optimal generator ?? CAREFUL : we want to be sure not to miss anything
           if unquote(relation).(a, b), do: unquote(relation).(b, a), else: true

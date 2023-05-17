@@ -32,10 +32,10 @@ defmodule Relations.Properties.Empty do
   def quoted_check(generator, relation, inspect: inspect) do
     if inspect do
       quote do
-        check all(
-                l <- unquote(generator),
-                r <- unquote(generator)
-              ) do
+        ExUnitProperties.check all(
+                                 l <- unquote(generator),
+                                 r <- unquote(generator)
+                               ) do
           IO.write(Relations.Properties.Empty.inspect_descr(l, r, unquote(relation)))
           res = unquote(relation).(l, r)
           IO.inspect(res)
@@ -44,10 +44,10 @@ defmodule Relations.Properties.Empty do
       end
     else
       quote do
-        check all(
-                l <- unquote(generator),
-                r <- unquote(generator)
-              ) do
+        ExUnitProperties.check all(
+                                 l <- unquote(generator),
+                                 r <- unquote(generator)
+                               ) do
           assert unquote(relation).(l, r) == false
         end
       end

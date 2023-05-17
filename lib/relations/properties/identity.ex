@@ -33,10 +33,10 @@ defmodule Relations.Properties.Identity do
     if inspect do
       quote do
         # TODO : other generator
-        check all(
-                i <- unquote(generator),
-                o <- unquote(generator) |> StreamData.filter(fn x -> x != i end)
-              ) do
+        ExUnitProperties.check all(
+                                 i <- unquote(generator),
+                                 o <- unquote(generator) |> StreamData.filter(fn x -> x != i end)
+                               ) do
           IO.write(Relations.Properties.Identity.inspect_descr(i, o, unquote(relation)))
           res = unquote(relation).(i, i) and not unquote(relation).(i, o)
           IO.inspect(res)
@@ -46,10 +46,10 @@ defmodule Relations.Properties.Identity do
     else
       quote do
         # TODO : other generator
-        check all(
-                i <- unquote(generator),
-                o <- unquote(generator) |> StreamData.filter(fn x -> x != i end)
-              ) do
+        ExUnitProperties.check all(
+                                 i <- unquote(generator),
+                                 o <- unquote(generator) |> StreamData.filter(fn x -> x != i end)
+                               ) do
           assert unquote(relation).(i, i) and not unquote(relation).(i, o)
         end
       end

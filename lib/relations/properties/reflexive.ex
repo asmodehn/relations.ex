@@ -32,7 +32,7 @@ defmodule Relations.Properties.Reflexive do
   def quoted_check(generator, relation, inspect: inspect) do
     if inspect do
       quote do
-        check all(r <- unquote(generator)) do
+        ExUnitProperties.check all(r <- unquote(generator)) do
           IO.write(Relations.Properties.Reflexive.inspect_descr(r, unquote(relation)))
           res = unquote(relation).(r, r)
           IO.inspect(res)
@@ -41,7 +41,7 @@ defmodule Relations.Properties.Reflexive do
       end
     else
       quote do
-        check all(r <- unquote(generator)) do
+        ExUnitProperties.check all(r <- unquote(generator)) do
           assert unquote(relation).(r, r)
         end
       end

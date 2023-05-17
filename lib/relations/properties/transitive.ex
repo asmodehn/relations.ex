@@ -32,11 +32,11 @@ defmodule Relations.Properties.Transitive do
   def quoted_check(generator, relation, inspect: inspect) do
     if inspect do
       quote do
-        check all(
-                a <- unquote(generator),
-                b <- unquote(generator),
-                c <- unquote(generator)
-              ) do
+        ExUnitProperties.check all(
+                                 a <- unquote(generator),
+                                 b <- unquote(generator),
+                                 c <- unquote(generator)
+                               ) do
           IO.write(Relations.Properties.Transitive.inspect_descr(a, b, c, unquote(relation)))
           # pass as relation doesnt have to be true for all values...
           res =
@@ -50,11 +50,11 @@ defmodule Relations.Properties.Transitive do
       end
     else
       quote do
-        check all(
-                a <- unquote(generator),
-                b <- unquote(generator),
-                c <- unquote(generator)
-              ) do
+        ExUnitProperties.check all(
+                                 a <- unquote(generator),
+                                 b <- unquote(generator),
+                                 c <- unquote(generator)
+                               ) do
           # pass as relation doesnt have to be true for all values...
           # TODO : more optimal generator ?? CAREFUL : we want to be sure not to miss anything
           if unquote(relation).(a, b) and unquote(relation).(b, c),

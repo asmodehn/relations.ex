@@ -96,7 +96,7 @@ defmodule Relations.CompiledTests do
     test_module =
       quote do
         # TODO : multiple relations ??
-        defmodule Test do
+        defmodule Properties do
           @moduledoc false
 
           require Relations.Properties
@@ -119,56 +119,5 @@ defmodule Relations.CompiledTests do
       end
 
     [reldef, test_module]
-  end
-
-  # properties as a class attribute for this ?? like tag in describe / test ?? 
-  # or as paramters of defrel ??
-
-  defmacro reltest(module, _opts \\ []) do
-    caller = __CALLER__
-
-    require =
-      if is_atom(Macro.expand(module, caller)) do
-        quote do
-          require unquote(module)
-        end
-      end
-
-    tests =
-      quote bind_quoted: [
-              module: module,
-              env_line: caller.line,
-              env_file: caller.file
-            ] do
-        rel_proptest_module = Module.concat([module, Test])
-
-        # gathering relation property tests
-        for {reltest_name, one} <-
-              rel_proptest_module.__info__(:functions)
-              |> Enum.filter(fn {n, a} ->
-                n != :relation and
-                  not String.starts_with?(Atom.to_string(n), "__")
-              end) do
-          t =
-            ExUnit.Case.register_test(
-              __MODULE__,
-              env_file,
-              env_line,
-              Properties.Utils.string_or_inspect(module),
-              reltest_name,
-              []
-            )
-
-          def unquote(t)(_) do
-            # calling reltest_name test from relationtest module, with module and relation in context
-
-            apply(unquote(rel_proptest_module), unquote(reltest_name), [
-              %{module: unquote(module)}
-            ])
-          end
-        end
-      end
-
-    [require, tests]
   end
 end

@@ -9,9 +9,9 @@ defmodule CompiledExampleTest do
 
   # reltest CompiledExample, &equal/2
 
-  require Relations.CompiledTests
+  require Relations.Properties
 
-  Relations.CompiledTests.reltest(CompiledExample)
+  Relations.Properties.check(CompiledExample)
 
   # Relations.check_equivalence &CompiledExample.congruent?/2, for: Example.all()
   # TODO MAYBE ?
