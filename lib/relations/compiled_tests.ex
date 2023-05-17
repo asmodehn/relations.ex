@@ -97,6 +97,8 @@ defmodule Relations.CompiledTests do
       quote do
         # TODO : multiple relations ??
         defmodule Test do
+          @moduledoc false
+
           require Relations.Properties
 
           # @generator &unquote(module).all/0
@@ -143,8 +145,10 @@ defmodule Relations.CompiledTests do
         # gathering relation property tests
         for {reltest_name, one} <-
               rel_proptest_module.__info__(:functions)
-              |> Enum.filter(fn {n, a} -> not String.starts_with?(Atom.to_string(n), "__") end)
-              |> Enum.filter(fn {n, a} -> n != :relation end) do
+              |> Enum.filter(fn {n, a} ->
+                n != :relation and
+                  not String.starts_with?(Atom.to_string(n), "__")
+              end) do
           t =
             ExUnit.Case.register_test(
               __MODULE__,

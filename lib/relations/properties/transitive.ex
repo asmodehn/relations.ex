@@ -1,4 +1,6 @@
 defmodule Relations.Properties.Transitive do
+  @moduledoc false
+
   alias Relations.Properties.Utils
 
   def quoted_property(generator, relation, opts \\ [descr: nil, inspect: false]) do

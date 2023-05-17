@@ -1,4 +1,6 @@
 defmodule Relations.Properties.Empty do
+  @moduledoc false
+
   alias Relations.Properties.Utils
 
   def quoted_property(generator, relation, opts \\ [inspect: false]) do
