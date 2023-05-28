@@ -2,6 +2,8 @@
 
 An Elixir helper package to define relations and corresponding property tests
 
+TODO : maybe change name ?? category if we get category to replace `module` with extra semantics ??
+
 the main macro defined here are :
 - defeq to define an equivalence relation,
 - defrel to define a relation (function with two arguments) with the properties it must satisfy,

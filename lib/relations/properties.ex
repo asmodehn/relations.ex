@@ -9,7 +9,15 @@ defmodule Relations.Properties do
 
   alias Relations.Properties.Utils
 
-  alias Relations.Properties.{Empty, Universal, Identity, Reflexive, Symmetric, Transitive}
+  alias Relations.Properties.{
+    Empty,
+    Universal,
+    Identity,
+    Reflexive,
+    Symmetric,
+    Transitive,
+    Antisymmetric
+  }
 
   defmacro empty(generator, relation, opts \\ [inspect: false]) do
     quote do
@@ -41,7 +49,11 @@ defmodule Relations.Properties do
     end
   end
 
-  # TODO: antisymmetric
+  defmacro antisymmetric(generator, relation, opts \\ [descr: nil, inspect: false]) do
+    quote do
+      unquote(Antisymmetric.quoted_property(generator, relation, opts))
+    end
+  end
 
   defmacro transitive(generator, relation, opts \\ [descr: nil, inspect: false]) do
     quote do

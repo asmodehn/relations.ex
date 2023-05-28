@@ -83,6 +83,12 @@ defmodule Relations.PropertiesTest do
     # more simple, yet non-trivial examples ?
   end
 
+  describe "antisymmetric/2" do
+    # non-strict ordering is anti symmetric
+    Properties.antisymmetric(StreamData.integer(), &Kernel.>=/2)
+    Properties.antisymmetric(StreamData.integer(), &Kernel.<=/2)
+  end
+
   # TODO : equivalence like any other property ??
 
   Properties.describe(StreamData.integer(), &Kernel.==/2,
