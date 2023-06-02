@@ -61,46 +61,58 @@ defmodule Relations.Properties do
     end
   end
 
-  def describe_descr(generator, relation) do
-    rel_str = Utils.string_or_inspect(relation)
+  #
+  #  def describe_descr(generator, relation) do
+  #    rel_str = Utils.string_or_inspect(relation)
+  #
+  #    gen_str = Utils.string_or_inspect(generator)
+  #
+  #    "#{rel_str} for #{gen_str}"
+  #  end
 
-    gen_str = Utils.string_or_inspect(generator)
+  # TODO:
+  #  defmacro quoted_properties(relation, properties \\ [inspect: false]) when is_list(properties) do
+  #
+  #  end
+  # instead of:
 
-    "#{rel_str} for #{gen_str}"
-  end
-
-  defmacro describe(generator, relation, properties \\ [descr: nil, inspect: false])
+  defmacro describe(relation, properties \\ [inspect: false])
            when is_list(properties) do
     # If it is a function that needs to be called (because of late definition for instance)
     # then we call it and quote its result.
     # generator = if is_function(unquote(generator), 0), do: quote(unquote(generator)()), else: generator
 
     inspect = Keyword.get(properties, :inspect, false)
-    descr = Keyword.get(properties, :descr)
+    #    descr = Keyword.get(properties, :descr)
+
+    # TODO :assert generator is like &mygen/0
 
     quoted_check =
       properties
       |> Keyword.drop([:inspect, :descr])
       |> Enum.map(fn {k, e} ->
         case {k, e} do
-          {:reflexive, true} ->
+          {:reflexive, generator} ->
             quote do:
-                    Relations.Properties.reflexive(unquote(generator), unquote(relation),
-                      descr: "#{Utils.string_or_inspect(unquote(relation))} is reflexive",
+                    Relations.Properties.reflexive(unquote(generator).(), unquote(relation),
+                      descr:
+                        "#{Utils.string_or_inspect(unquote(relation))} is reflexive for #{Utils.string_or_inspect(unquote(generator))}",
                       inspect: unquote(inspect)
                     )
 
-          {:symmetric, true} ->
+          {:symmetric, generator} ->
             quote do:
-                    Relations.Properties.symmetric(unquote(generator), unquote(relation),
-                      descr: "#{Utils.string_or_inspect(unquote(relation))} is symmetric",
+                    Relations.Properties.symmetric(unquote(generator).(), unquote(relation),
+                      descr:
+                        "#{Utils.string_or_inspect(unquote(relation))} is symmetric for #{Utils.string_or_inspect(unquote(generator))}",
                       inspect: unquote(inspect)
                     )
 
-          {:transitive, true} ->
+          {:transitive, generator} ->
             quote do:
-                    Relations.Properties.transitive(unquote(generator), unquote(relation),
-                      descr: "#{Utils.string_or_inspect(unquote(relation))} is transitive",
+                    Relations.Properties.transitive(unquote(generator).(), unquote(relation),
+                      descr:
+                        "#{Utils.string_or_inspect(unquote(relation))} is transitive for #{Utils.string_or_inspect(unquote(generator))}",
                       inspect: unquote(inspect)
                     )
 
@@ -110,19 +122,20 @@ defmodule Relations.Properties do
         end
       end)
 
-    if descr do
-      quote do
-        # describe unquote(descr) do
-        unquote(quoted_check)
-        # end
-      end
-    else
-      quote do
-        describe Relations.Properties.describe_descr(unquote(generator), unquote(relation)) do
-          unquote(quoted_check)
-        end
-      end
+    #    if descr do
+    quote do
+      # describe unquote(descr) do
+      unquote(quoted_check)
+      # end
     end
+
+    #    else
+    #      quote do
+    #        describe Relations.Properties.describe_descr(unquote(generator), unquote(relation)) do
+    #          unquote(quoted_check)
+    #        end
+    #      end
+    #    end
   end
 
   # defmacro describe(generator, relation, properties ) do

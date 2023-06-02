@@ -84,7 +84,7 @@ defmodule Relations.CompiledTests do
 
     {rel, _ctx, _contents} = definition
 
-    # default description using relation name and generator module
+    # default description using relation name
     descr = "#{rel}"
 
     properties =
@@ -101,7 +101,6 @@ defmodule Relations.CompiledTests do
 
           require Relations.Properties
 
-          # @generator &unquote(module).all/0
           @relation &(unquote(module).unquote(rel) / 2)
 
           def relation, do: @relation
@@ -110,8 +109,6 @@ defmodule Relations.CompiledTests do
           use ExUnitProperties
 
           Relations.Properties.describe(
-            unquote(gen_module).all(),
-            # &(unquote(module).unquote(rel) / 2),
             @relation,
             unquote(properties)
           )

@@ -21,7 +21,10 @@ defmodule CompiledExample do
 
   use Relations
 
-  defrel congruent?(l, r), reflexive: true, symmetric: true, transitive: true do
+  defrel congruent?(l, r),
+    reflexive: &Generator.all/0,
+    symmetric: &Generator.all/0,
+    transitive: &Generator.all/0 do
     # congruent if they have same remainder
     rem(l.int, @modulus) == rem(r.int, @modulus)
   end
