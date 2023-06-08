@@ -19,24 +19,6 @@ defmodule Relations.Properties do
     Antisymmetric
   }
 
-  defmodule DefProperties do
-    defstruct kind: nil,
-              fun: nil,
-              args: nil,
-              guards: nil,
-              body: nil,
-              properties: nil,
-              attrs: nil
-  end
-
-  @valid_properties [
-    :transitive,
-    :symmetric,
-    :associative,
-    :reflexive,
-    :antisymmetric
-  ]
-
   defmacro empty(generator, relation, opts \\ [inspect: false]) do
     quote do
       unquote(Empty.quoted_property(generator, relation, opts))
@@ -91,43 +73,23 @@ defmodule Relations.Properties do
   defmacro __using__(opts \\ []) do
     quote do
       Relations.Properties.__register__(__MODULE__, unquote(opts))
+
+      import Relations.Properties, only: [verify: 2, verify: 1]
     end
   end
 
   # Ref: https://github.com/arjan/decorator/blob/master/lib/decorator/decorate.ex
-  def __on_definition__(env, kind, fun, args, guards, body) do
+  def __on_definition__(env, :def, fun, args, _guards, _body) do
     properties = Module.get_attribute(env.module, :property)
 
-    attrs = extract_attributes(env.module, body)
-
-    with_properties = %DefProperties{
-      kind: kind,
-      fun: fun,
-      args: args,
-      guards: guards,
-      body: body,
-      properties:
+    with_properties =
+      Relations.Property.new(
+        Function.capture(env.module, fun, length(args)),
         properties
-        |> Enum.map(fn
-          [{k, v}] when k in @valid_properties -> {k, v}
-        end),
-      attrs: attrs
-    }
+      )
 
     Module.put_attribute(env.module, :with_properties, with_properties)
     Module.delete_attribute(env.module, :property)
-  end
-
-  defp extract_attributes(module, body) do
-    Macro.postwalk(body, %{}, fn
-      {:@, _, [{attr, _, nil}]} = n, attrs ->
-        attrs = Map.put(attrs, attr, Module.get_attribute(module, attr))
-        {n, attrs}
-
-      n, acc ->
-        {n, acc}
-    end)
-    |> elem(1)
   end
 
   def __register__(module, opts) do
@@ -164,10 +126,7 @@ defmodule Relations.Properties do
   defmacro __before_compile__(env) do
     properties =
       Module.get_attribute(env.module, :with_properties)
-      |> Enum.map(fn
-        %DefProperties{kind: :def, fun: name, args: args, properties: props} ->
-          quoted_properties_test(Function.capture(env.module, name, length(args)), props)
-      end)
+      |> Enum.map(&Relations.Property.quoted_expand/1)
 
     quote do
       # nested module
@@ -179,53 +138,6 @@ defmodule Relations.Properties do
         unquote_splicing(properties)
       end
     end
-  end
-
-  defmacro properties_test(relation, properties \\ [inspect: false])
-           when is_list(properties) do
-    quoted_properties_test(relation, properties)
-  end
-
-  def quoted_properties_test(relation, properties \\ [inspect: false])
-      when is_list(properties) do
-    inspect = Keyword.get(properties, :inspect, false)
-    #    descr = Keyword.get(properties, :descr)
-
-    # TODO :assert generator is like &mygen/0
-
-    properties
-    |> Keyword.drop([:inspect, :descr])
-    |> Enum.map(fn {k, e} ->
-      case {k, e} do
-        {:reflexive, generator} ->
-          quote do:
-                  Relations.Properties.reflexive(unquote(generator).(), unquote(relation),
-                    descr:
-                      "#{Utils.string_or_inspect(unquote(relation))} is reflexive for #{Utils.string_or_inspect(unquote(generator))}",
-                    inspect: unquote(inspect)
-                  )
-
-        {:symmetric, generator} ->
-          quote do:
-                  Relations.Properties.symmetric(unquote(generator).(), unquote(relation),
-                    descr:
-                      "#{Utils.string_or_inspect(unquote(relation))} is symmetric for #{Utils.string_or_inspect(unquote(generator))}",
-                    inspect: unquote(inspect)
-                  )
-
-        {:transitive, generator} ->
-          quote do:
-                  Relations.Properties.transitive(unquote(generator).(), unquote(relation),
-                    descr:
-                      "#{Utils.string_or_inspect(unquote(relation))} is transitive for #{Utils.string_or_inspect(unquote(generator))}",
-                    inspect: unquote(inspect)
-                  )
-
-        # TODO : handle false case ? semantics ? need to be compared with not present (ie. no test) 
-        unknown ->
-          raise RuntimeError, message: "#{Kernel.inspect(unknown)} is not a known property"
-      end
-    end)
   end
 
   defmacro verify(module, _opts \\ []) do

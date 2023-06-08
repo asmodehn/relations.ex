@@ -90,11 +90,4 @@ defmodule Relations.PropertiesTest do
   end
 
   # TODO : equivalence like any other property ??
-
-  Properties.properties_test(&Kernel.==/2,
-    reflexive: &StreamData.integer/0,
-    symmetric: &StreamData.integer/0,
-    transitive: &StreamData.integer/0,
-    inspect: false
-  )
 end
