@@ -61,82 +61,9 @@ defmodule Relations.Properties do
     end
   end
 
-  #
-  #  def describe_descr(generator, relation) do
-  #    rel_str = Utils.string_or_inspect(relation)
-  #
-  #    gen_str = Utils.string_or_inspect(generator)
-  #
-  #    "#{rel_str} for #{gen_str}"
-  #  end
-
-  defmacro __using__(opts \\ []) do
+  defmacro __using__(_opts \\ []) do
     quote do
-      Relations.Properties.__register__(__MODULE__, unquote(opts))
-
       import Relations.Properties, only: [verify: 2, verify: 1]
-    end
-  end
-
-  # Ref: https://github.com/arjan/decorator/blob/master/lib/decorator/decorate.ex
-  def __on_definition__(env, :def, fun, args, _guards, _body) do
-    properties = Module.get_attribute(env.module, :property)
-
-    with_properties =
-      Relations.Property.new(
-        Function.capture(env.module, fun, length(args)),
-        properties
-      )
-
-    Module.put_attribute(env.module, :with_properties, with_properties)
-    Module.delete_attribute(env.module, :property)
-  end
-
-  def __register__(module, opts) do
-    unless Keyword.keyword?(opts) do
-      raise ArgumentError,
-            ~s(the argument passed to "use Relations.Properties" must be a list of options, ) <>
-              ~s(got: #{inspect(opts)})
-    end
-
-    property_check = Enum.any?([:property], &Module.has_attribute?(module, &1))
-
-    if property_check do
-      raise "you must set @property after the call to \"use Relations.Properties\""
-    end
-
-    accumulate_attributes = [
-      # property attribute
-      :property,
-      # property with functions (copied from decorator.ex)
-      :with_properties
-    ]
-
-    Enum.each(accumulate_attributes, &Module.register_attribute(module, &1, accumulate: true))
-
-    #      if Keyword.get(opts, :register, true) do
-    #        Module.put_attribute(module, :after_compile, __MODULE__)
-    #      end
-
-    Module.put_attribute(module, :before_compile, __MODULE__)
-    Module.put_attribute(module, :on_definition, __MODULE__)
-  end
-
-  @doc false
-  defmacro __before_compile__(env) do
-    properties =
-      Module.get_attribute(env.module, :with_properties)
-      |> Enum.map(&Relations.Property.quoted_expand/1)
-
-    quote do
-      # nested module
-      defmodule Properties do
-        use ExUnit.Case, async: true
-
-        use ExUnitProperties
-
-        unquote_splicing(properties)
-      end
     end
   end
 

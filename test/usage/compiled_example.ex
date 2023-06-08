@@ -31,7 +31,7 @@ defmodule CompiledExample do
   #  end
   #
   # New syntax
-  use Relations.Properties
+  use Relations.Property.Decorator
 
   @property reflexive: &Generator.all/0
   @property symmetric: &Generator.all/0
