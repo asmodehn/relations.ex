@@ -19,6 +19,24 @@ defmodule Relations.Properties do
     Antisymmetric
   }
 
+  defmodule DefProperties do
+    defstruct kind: nil,
+              fun: nil,
+              args: nil,
+              guards: nil,
+              body: nil,
+              properties: nil,
+              attrs: nil
+  end
+
+  @valid_properties [
+    :transitive,
+    :symmetric,
+    :associative,
+    :reflexive,
+    :antisymmetric
+  ]
+
   defmacro empty(generator, relation, opts \\ [inspect: false]) do
     quote do
       unquote(Empty.quoted_property(generator, relation, opts))
@@ -70,99 +88,147 @@ defmodule Relations.Properties do
   #    "#{rel_str} for #{gen_str}"
   #  end
 
-  # TODO:
-  #  defmacro quoted_properties(relation, properties \\ [inspect: false]) when is_list(properties) do
-  #
-  #  end
-  # instead of:
+  defmacro __using__(opts \\ []) do
+    quote do
+      Relations.Properties.__register__(__MODULE__, unquote(opts))
+    end
+  end
 
-  defmacro describe(relation, properties \\ [inspect: false])
+  # Ref: https://github.com/arjan/decorator/blob/master/lib/decorator/decorate.ex
+  def __on_definition__(env, kind, fun, args, guards, body) do
+    properties = Module.get_attribute(env.module, :property)
+
+    attrs = extract_attributes(env.module, body)
+
+    with_properties = %DefProperties{
+      kind: kind,
+      fun: fun,
+      args: args,
+      guards: guards,
+      body: body,
+      properties:
+        properties
+        |> Enum.map(fn
+          [{k, v}] when k in @valid_properties -> {k, v}
+        end),
+      attrs: attrs
+    }
+
+    Module.put_attribute(env.module, :with_properties, with_properties)
+    Module.delete_attribute(env.module, :property)
+  end
+
+  defp extract_attributes(module, body) do
+    Macro.postwalk(body, %{}, fn
+      {:@, _, [{attr, _, nil}]} = n, attrs ->
+        attrs = Map.put(attrs, attr, Module.get_attribute(module, attr))
+        {n, attrs}
+
+      n, acc ->
+        {n, acc}
+    end)
+    |> elem(1)
+  end
+
+  def __register__(module, opts) do
+    unless Keyword.keyword?(opts) do
+      raise ArgumentError,
+            ~s(the argument passed to "use Relations.Properties" must be a list of options, ) <>
+              ~s(got: #{inspect(opts)})
+    end
+
+    property_check = Enum.any?([:property], &Module.has_attribute?(module, &1))
+
+    if property_check do
+      raise "you must set @property after the call to \"use Relations.Properties\""
+    end
+
+    accumulate_attributes = [
+      # property attribute
+      :property,
+      # property with functions (copied from decorator.ex)
+      :with_properties
+    ]
+
+    Enum.each(accumulate_attributes, &Module.register_attribute(module, &1, accumulate: true))
+
+    #      if Keyword.get(opts, :register, true) do
+    #        Module.put_attribute(module, :after_compile, __MODULE__)
+    #      end
+
+    Module.put_attribute(module, :before_compile, __MODULE__)
+    Module.put_attribute(module, :on_definition, __MODULE__)
+  end
+
+  @doc false
+  defmacro __before_compile__(env) do
+    properties =
+      Module.get_attribute(env.module, :with_properties)
+      |> Enum.map(fn
+        %DefProperties{kind: :def, fun: name, args: args, properties: props} ->
+          quoted_properties_test(Function.capture(env.module, name, length(args)), props)
+      end)
+
+    quote do
+      # nested module
+      defmodule Properties do
+        use ExUnit.Case, async: true
+
+        use ExUnitProperties
+
+        unquote_splicing(properties)
+      end
+    end
+  end
+
+  defmacro properties_test(relation, properties \\ [inspect: false])
            when is_list(properties) do
-    # If it is a function that needs to be called (because of late definition for instance)
-    # then we call it and quote its result.
-    # generator = if is_function(unquote(generator), 0), do: quote(unquote(generator)()), else: generator
+    quoted_properties_test(relation, properties)
+  end
 
+  def quoted_properties_test(relation, properties \\ [inspect: false])
+      when is_list(properties) do
     inspect = Keyword.get(properties, :inspect, false)
     #    descr = Keyword.get(properties, :descr)
 
     # TODO :assert generator is like &mygen/0
 
-    quoted_check =
-      properties
-      |> Keyword.drop([:inspect, :descr])
-      |> Enum.map(fn {k, e} ->
-        case {k, e} do
-          {:reflexive, generator} ->
-            quote do:
-                    Relations.Properties.reflexive(unquote(generator).(), unquote(relation),
-                      descr:
-                        "#{Utils.string_or_inspect(unquote(relation))} is reflexive for #{Utils.string_or_inspect(unquote(generator))}",
-                      inspect: unquote(inspect)
-                    )
+    properties
+    |> Keyword.drop([:inspect, :descr])
+    |> Enum.map(fn {k, e} ->
+      case {k, e} do
+        {:reflexive, generator} ->
+          quote do:
+                  Relations.Properties.reflexive(unquote(generator).(), unquote(relation),
+                    descr:
+                      "#{Utils.string_or_inspect(unquote(relation))} is reflexive for #{Utils.string_or_inspect(unquote(generator))}",
+                    inspect: unquote(inspect)
+                  )
 
-          {:symmetric, generator} ->
-            quote do:
-                    Relations.Properties.symmetric(unquote(generator).(), unquote(relation),
-                      descr:
-                        "#{Utils.string_or_inspect(unquote(relation))} is symmetric for #{Utils.string_or_inspect(unquote(generator))}",
-                      inspect: unquote(inspect)
-                    )
+        {:symmetric, generator} ->
+          quote do:
+                  Relations.Properties.symmetric(unquote(generator).(), unquote(relation),
+                    descr:
+                      "#{Utils.string_or_inspect(unquote(relation))} is symmetric for #{Utils.string_or_inspect(unquote(generator))}",
+                    inspect: unquote(inspect)
+                  )
 
-          {:transitive, generator} ->
-            quote do:
-                    Relations.Properties.transitive(unquote(generator).(), unquote(relation),
-                      descr:
-                        "#{Utils.string_or_inspect(unquote(relation))} is transitive for #{Utils.string_or_inspect(unquote(generator))}",
-                      inspect: unquote(inspect)
-                    )
+        {:transitive, generator} ->
+          quote do:
+                  Relations.Properties.transitive(unquote(generator).(), unquote(relation),
+                    descr:
+                      "#{Utils.string_or_inspect(unquote(relation))} is transitive for #{Utils.string_or_inspect(unquote(generator))}",
+                    inspect: unquote(inspect)
+                  )
 
-          # TODO : handle false case ? semantics ? need to be compared with not present (ie. no test) 
-          unknown ->
-            raise RuntimeError, message: "#{Kernel.inspect(unknown)} is not a known property"
-        end
-      end)
-
-    #    if descr do
-    quote do
-      # describe unquote(descr) do
-      unquote(quoted_check)
-      # end
-    end
-
-    #    else
-    #      quote do
-    #        describe Relations.Properties.describe_descr(unquote(generator), unquote(relation)) do
-    #          unquote(quoted_check)
-    #        end
-    #      end
-    #    end
+        # TODO : handle false case ? semantics ? need to be compared with not present (ie. no test) 
+        unknown ->
+          raise RuntimeError, message: "#{Kernel.inspect(unknown)} is not a known property"
+      end
+    end)
   end
 
-  # defmacro describe(generator, relation, properties ) do
-  #   IO.inspect([generator, relation, properties])
-  # end
-
-  #  TODO: multiple various properties in one module
-  #  def quoted_module(properties) when is_list(properties) do
-  #
-  #    properties |> IO.inspect()
-  #
-  #    quote do
-  #        defmodule Properties do
-  #          @moduledoc false
-  #
-  #          require Relations.Properties
-  #
-  #          use ExUnit.Case
-  #          use ExUnitProperties
-  #
-  #          unquote_splicing(properties)
-  #
-  #        end
-  #      end
-  #  end
-
-  defmacro check(module, _opts \\ []) do
+  defmacro verify(module, _opts \\ []) do
     caller = __CALLER__
 
     require =

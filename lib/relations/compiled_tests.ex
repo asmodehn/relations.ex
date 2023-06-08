@@ -1,8 +1,6 @@
 defmodule Relations.CompiledTests do
   @moduledoc false
 
-  alias Relations.Properties
-
   defmodule UndefinedError do
     @moduledoc ~S"""
     Warning if reltest is used, but the module is missing the relation.
@@ -66,55 +64,49 @@ defmodule Relations.CompiledTests do
   # TODO: add possible properties for a relation, cf. https://math.libretexts.org/Bookshelves/Combinatorics_and_Discrete_Mathematics/A_Spiral_Workbook_for_Discrete_Mathematics_(Kwong)/07%3A_Relations/7.02%3A_Properties_of_Relations
   # Note : total relation or not depends on the genertor used for the property check.
 
-  defmacro defrel(definition, properties \\ [inspect: false], do: body) do
-    module = __CALLER__.module
-
-    gen_module = Module.concat([module, Generator])
-
-    # IO.inspect("In macro defrel for #{module}")
-
-    # definition |> IO.inspect()
-
-    reldef =
-      quote do
-        def unquote(definition) do
-          unquote(body)
-        end
-      end
-
-    {rel, _ctx, _contents} = definition
-
-    # default description using relation name
-    descr = "#{rel}"
-
-    properties =
-      Keyword.update(properties, :descr, descr, fn d ->
-        if is_nil(d), do: descr, else: d
-      end)
-
-    # Properties of the relation 
-    test_module =
-      quote do
-        # TODO : multiple relations ??
-        defmodule Properties do
-          @moduledoc false
-
-          require Relations.Properties
-
-          @relation &(unquote(module).unquote(rel) / 2)
-
-          def relation, do: @relation
-
-          use ExUnit.Case
-          use ExUnitProperties
-
-          Relations.Properties.describe(
-            @relation,
-            unquote(properties)
-          )
-        end
-      end
-
-    [reldef, test_module]
-  end
+  #  defmacro defrel(definition, properties \\ [inspect: false], do: body) do
+  #    module = __CALLER__.module
+  #
+  #    # IO.inspect("In macro defrel for #{module}")
+  #
+  #    # definition |> IO.inspect()
+  #
+  #    reldef =
+  #      quote do
+  #        def unquote(definition) do
+  #          unquote(body)
+  #        end
+  #      end
+  #
+  #    {rel, _ctx, _contents} = definition
+  #
+  #    # default description using relation name
+  #    descr = "#{rel}"
+  #
+  #    properties =
+  #      Keyword.update(properties, :descr, descr, fn d ->
+  #        if is_nil(d), do: descr, else: d
+  #      end)
+  #
+  #    # Properties of the relation
+  #    test_module =
+  #      quote do
+  #        # TODO : multiple relations ??
+  #        defmodule Properties do
+  #          @moduledoc false
+  #
+  #          require Relations.Properties
+  #
+  #          use ExUnit.Case
+  #          use ExUnitProperties
+  #
+  #          Relations.Properties.properties(
+  #             &(unquote(module).unquote(rel) / 2),
+  #            unquote(properties)
+  #          )
+  #        end
+  #      end
+  #
+  #    [reldef, test_module]
+  #  end
 end

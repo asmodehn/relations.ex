@@ -11,7 +11,7 @@ defmodule CompiledExampleTest do
 
   require Relations.Properties
 
-  Relations.Properties.check(CompiledExample)
+  Relations.Properties.verify(CompiledExample)
 
   # Relations.check_equivalence &CompiledExample.congruent?/2, for: Example.all()
   # TODO MAYBE ?

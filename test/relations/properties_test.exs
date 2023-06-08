@@ -91,7 +91,7 @@ defmodule Relations.PropertiesTest do
 
   # TODO : equivalence like any other property ??
 
-  Properties.describe(&Kernel.==/2,
+  Properties.properties_test(&Kernel.==/2,
     reflexive: &StreamData.integer/0,
     symmetric: &StreamData.integer/0,
     transitive: &StreamData.integer/0,
