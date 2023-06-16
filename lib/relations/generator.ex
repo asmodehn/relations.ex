@@ -84,63 +84,6 @@ defmodule Relations.Generator do
     end
   end
 
-  defmodule UndefinedError do
-    @moduledoc ~S"""
-    Warning if reltest is used, but the module is missing the relation.
-    """
-
-    @type t :: %Relations.Generator.UndefinedError{
-            module: module(),
-            message: String.t()
-          }
-
-    defexception message: "Generator not defined for Relation", module: nil
-
-    @doc ~S"""
-    Convenience constructor
-
-    ## Examples
-
-        iex> Relations.UndefinedError.new(MyModule)
-        %Relations.UndefinedError{
-          module: MyModule,
-          message: ~S"
-          MyModule has not defined any generator, but they are required.
-
-          See `Relations.defgen/1` for more
-          "
-        }
-
-    """
-    @spec new(module()) :: t()
-    def new(module) do
-      %Relations.Generator.UndefinedError{
-        module: module,
-        message: """
-        #{module} has not defined any generator, but at least one is required.
-
-        See `Relations.defgen/1` for more details.
-        """
-      }
-    end
-  end
-
-  @spec ensure!() :: no_return()
-  defmacro ensure!() do
-    module = __CALLER__.module
-    gen_mod = Module.concat([module, All])
-
-    quote do
-      case Code.ensure_loaded(unquote(gen_mod)) do
-        {:module, _prop_submodule} ->
-          nil
-
-        {:error, :nofile} ->
-          raise UndefinedError.new(unquote(gen_mod))
-      end
-    end
-  end
-
   @spec clauses_and_body(atom(), Keyword.t()) :: {Keyword.t(), List.t()}
   def clauses_and_body(module, fields) do
     args = Macro.generate_unique_arguments(length(fields), __MODULE__)

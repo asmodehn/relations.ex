@@ -89,5 +89,10 @@ defmodule Relations.PropertiesTest do
     Properties.antisymmetric(StreamData.integer(), &Kernel.<=/2)
   end
 
-  # TODO : equivalence like any other property ??
+  describe "equivalence/2" do
+    # Equality on integers is an equivalence relation
+    Properties.equivalence(StreamData.integer(), &Kernel.==/2)
+
+  end
+
 end

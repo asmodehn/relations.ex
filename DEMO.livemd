@@ -1,0 +1,26 @@
+# DEMO
+
+```elixir
+# TODO, install package from hex.
+
+# At the moment, attach the runner to a running mix:
+# iex --sname relations --cookie bobbie mix run --no-start
+```
+
+## Section
+
+```elixir
+ExUnit.start(autorun: false)
+continuous_test_files = Path.wildcard("test/usage/test/*.exs")
+```
+
+```elixir
+test_modules =
+  continuous_test_files
+  |> Enum.flat_map(fn f -> Code.compile_file(f) end)
+  |> Enum.map(fn {m, _} -> m end)
+```
+
+```elixir
+ExUnit.run(test_modules)
+```

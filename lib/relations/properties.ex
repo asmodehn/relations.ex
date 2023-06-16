@@ -61,6 +61,14 @@ defmodule Relations.Properties do
     end
   end
 
+  defmacro equivalence(generator, relation, opts \\ [descr: nil, inspect: false]) do
+    quote do
+      unquote(Reflexive.quoted_property(generator, relation, opts))
+      unquote(Symmetric.quoted_property(generator, relation, opts))
+      unquote(Transitive.quoted_property(generator, relation, opts))
+    end
+  end
+
   defmacro __using__(_opts \\ []) do
     quote do
       import Relations.Properties, only: [verify: 2, verify: 1]
