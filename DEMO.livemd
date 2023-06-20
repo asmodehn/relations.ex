@@ -7,7 +7,7 @@
 # iex --sname relations --cookie bobbie mix run --no-start
 ```
 
-## Section
+## Running test in :dev via ExUnit
 
 ```elixir
 ExUnit.start(autorun: false)
@@ -23,4 +23,40 @@ test_modules =
 
 ```elixir
 ExUnit.run(test_modules)
+```
+
+```elixir
+ExUnit.run(test_modules)
+```
+
+```elixir
+# displays the currently loaded modules from ExUnit package
+
+local_loaded =
+  :code.all_loaded()
+  |> Enum.filter(fn
+    {_, :preloaded} ->
+      false
+
+    {:filename, _} ->
+      false
+
+    {a, _} ->
+      a
+      |> Atom.to_string()
+      # |> IO.inspect()
+      |> String.starts_with?("Elixir.ExUnit")
+  end)
+
+# Note How the ExUnit modules are not there any longer !!!
+```
+
+## Using ExUnitContinuous instead
+
+```elixir
+ExUnitContinuous.Supervisor.start()
+```
+
+```elixir
+ExUnitContinuous.run()
 ```

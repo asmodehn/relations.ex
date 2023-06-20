@@ -92,7 +92,5 @@ defmodule Relations.PropertiesTest do
   describe "equivalence/2" do
     # Equality on integers is an equivalence relation
     Properties.equivalence(StreamData.integer(), &Kernel.==/2)
-
   end
-
 end

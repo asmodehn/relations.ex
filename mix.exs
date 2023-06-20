@@ -3,10 +3,11 @@ defmodule Relations.MixProject do
 
   def project do
     [
-      app: :relations,
+      app: :ex_unit_continuous,
       version: "0.1.0",
-      elixir: "~> 1.13",
-      start_permanent: Mix.env() == :prod,
+      elixir: "~> 1.14",
+      # we want ExUnitContinuous to run permanently on dev environment
+      start_permanent: Mix.env() in [:prod, :dev],
       description: description(),
       package: package(),
       deps: deps(),
@@ -27,9 +28,15 @@ defmodule Relations.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: applications(Mix.env()),
+      mod: {ExUnitContinuous.Application, []}
     ]
   end
+
+  # ex_unit is run by mix on test environment
+  defp applications(:test), do: [:logger]
+  # but for other envs, we need to start ex_unit
+  defp applications(_), do: applications(:test) ++ [:ex_unit]
 
   defp description() do
     "Relations provides macros to run property tests on functions that can be defined as relations."
