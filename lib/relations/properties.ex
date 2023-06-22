@@ -75,6 +75,7 @@ defmodule Relations.Properties do
     end
   end
 
+  # TODO : with ExUnitContinuous, we should not need this here any longer...
   defmacro verify(module, _opts \\ []) do
     caller = __CALLER__
 

@@ -51,12 +51,15 @@ local_loaded =
 # Note How the ExUnit modules are not there any longer !!!
 ```
 
-## Using ExUnitContinuous instead
+## Using ExUnitContinuous.Runner instead
 
 ```elixir
-ExUnitContinuous.Supervisor.start()
+# Currently not needed
+# ExUnitContinuous.Supervisor.start()
+test_modules
 ```
 
 ```elixir
-ExUnitContinuous.run()
+require ExUnitContinuous.Runner
+ExUnitContinuous.Runner.run(test_modules)
 ```

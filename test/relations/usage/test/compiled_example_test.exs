@@ -1,5 +1,5 @@
 defmodule CompiledExampleTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   require CompiledExample
 

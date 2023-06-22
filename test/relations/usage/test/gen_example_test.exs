@@ -1,5 +1,5 @@
 defmodule GenExampleTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   require Example
 

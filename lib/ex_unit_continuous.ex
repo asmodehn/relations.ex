@@ -10,26 +10,26 @@ defmodule ExUnitContinuous do
     end
   end
 
-  #  @doc """
-  #    Run a usual ExUnit.Case test module, if it is already compiled.
-  #
-  #    If it is not compiled, but the source is accessible, the path can be passed in instead.
-  #    This is useful for scripts.
-  #
-  #  ## Examples
-  #
-  #      iex> ExUnitContinuous.run(["test/usage/test/example_test.exs"])
-  #      %{excluded: 0, failures: 0, skipped: 0, total: 4}
-  #
-  #      iex> ExUnitContinuous.run([ExampleTest])
-  #      %{excluded: 0, failures: 0, skipped: 0, total: 4}
-  #
-  #  """
 
-  defmacro run(m) do
-    quote do
-      require ExUnitContinuous.Runner
-      ExUnitContinuous.Runner.run(unquote(m))
-    end
+  @doc ~s"""
+      This is used in a test helper, just like ExUnit.start().
+    It will setup ExUnit appropriately for a common usage of usual `mix test` commands
+    as well as continuous tests in other envs.
+
+  """
+  @spec start(Keyword.t()) :: :ok
+  def start(exunit_options \\ []) do
+
+    {:ok, _} = Application.ensure_all_started(:ex_unit)
+
+    ExUnit.configure(exunit_options)
+    config = ExUnit.configuration()
+
+    # Note: adding scheduler for continuous testing
+    # might offer an alternative for this..
+    continuous_autorun = not config[:autorun]
+    ExUnit.start(continuous_autorun: continuous_autorun)
+
   end
+
 end

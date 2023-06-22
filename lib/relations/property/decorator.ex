@@ -58,6 +58,7 @@ defmodule Relations.Property.Decorator do
     quote do
       # nested module
       defmodule Properties do
+        # TODO : Use ExUnitContinuous here instead ??
         use ExUnit.Case, async: true
         use ExUnitProperties
 
