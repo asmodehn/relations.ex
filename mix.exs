@@ -61,7 +61,7 @@ defmodule Relations.MixProject do
 
   # Specifies which paths to compile per environment.
   # to be able to interactively use test/usage
-#  defp elixirc_paths(:dev), do: ["lib", "test/ex_unit_continuous/usage"]
+  #  defp elixirc_paths(:dev), do: ["lib", "test/ex_unit_continuous/usage"]
   defp elixirc_paths(:test), do: ["lib", "test/ex_unit_continuous/usage", "test/relations/usage"]
   defp elixirc_paths(_), do: ["lib", "test/ex_unit_continuous/usage"]
 

@@ -1,29 +1,29 @@
 defmodule ExUnitContinuous.CompiledDefaultTest do
-    use ExUnit.Case
+  @moduledoc false
 
-    test "some sync (by default) test" do
-      true
-    end
+  use ExUnit.Case
 
+  test "some sync (by default) test" do
+    true
   end
+end
 
-  defmodule ExUnitContinuous.CompiledSyncTest do
-    use ExUnit.Case, async: false
+defmodule ExUnitContinuous.CompiledSyncTest do
+  @moduledoc false
 
-    test "some sync test" do
-      true
-    end
+  use ExUnit.Case, async: false
 
+  test "some sync test" do
+    true
   end
+end
 
+defmodule ExUnitContinuous.CompiledASyncTest do
+  @moduledoc false
 
+  use ExUnitContinuous.Case
 
-  defmodule ExUnitContinuous.CompiledASyncTest do
-    use ExUnitContinuous.Case
-
-
-    test "some async test" do
-      true
-    end
-
+  test "some async test" do
+    true
   end
+end

@@ -1,4 +1,10 @@
 defmodule ExUnitContinuous.Supervisor do
+
+  @moduledoc ~s"""
+    This module handles processes related with running ExUnit tests
+    on any environment.
+  """
+
   @ex_unit_server_spec %{
     # id intentionnally conflicts with ExUnit's ids, to make sure there is no overlap
     id: ExUnit.Server,
