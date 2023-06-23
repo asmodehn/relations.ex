@@ -11,7 +11,7 @@
 
 ```elixir
 ExUnit.start(autorun: false)
-continuous_test_files = Path.wildcard("test/usage/test/*.exs")
+continuous_test_files = Path.wildcard("test/ex_unit_continuous/usage/*.exs")
 ```
 
 ```elixir
@@ -22,33 +22,13 @@ test_modules =
 ```
 
 ```elixir
+# Running all tests
+# CAREFUL : sync tests (with potential side-effects) are also run
 ExUnit.run(test_modules)
 ```
 
 ```elixir
 ExUnit.run(test_modules)
-```
-
-```elixir
-# displays the currently loaded modules from ExUnit package
-
-local_loaded =
-  :code.all_loaded()
-  |> Enum.filter(fn
-    {_, :preloaded} ->
-      false
-
-    {:filename, _} ->
-      false
-
-    {a, _} ->
-      a
-      |> Atom.to_string()
-      # |> IO.inspect()
-      |> String.starts_with?("Elixir.ExUnit")
-  end)
-
-# Note How the ExUnit modules are not there any longer !!!
 ```
 
 ## Using ExUnitContinuous.Runner instead
@@ -56,10 +36,27 @@ local_loaded =
 ```elixir
 # Currently not needed
 # ExUnitContinuous.Supervisor.start()
-test_modules
+# test_modules
+
+updated = ExUnitContinuous.Updater.compile!("test/ex_unit_continuous/usage/compiled_tests.ex")
 ```
 
 ```elixir
-require ExUnitContinuous.Runner
-ExUnitContinuous.Runner.run(test_modules)
+ExUnitContinuous.Runner.run(updated)
+```
+
+### Source File change
+
+Go on and change the original test file.
+
+The next code cell will force the update of the module,by recompiling its source file.
+
+```elixir
+for m <- updated do
+  ExUnitContinuous.Updater.ensure_updated(m)
+end
+```
+
+```elixir
+ExUnitContinuous.Runner.run(updated)
 ```

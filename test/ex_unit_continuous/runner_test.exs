@@ -4,7 +4,6 @@ defmodule ExUnitContinuous.RunnerAsyncTest do
   alias ExUnitContinuous.ExUnitServer
 
   # TODO: some useful tests without side-effect ?
-
 end
 
 defmodule ExUnitContinuous.RunnerTest do
@@ -20,13 +19,13 @@ defmodule ExUnitContinuous.RunnerTest do
     on_exit(fn ->
       ExUnitServer._async_modules(fn sm -> sm |> List.delete(__MODULE__) end)
     end)
+
     assert ExUnitContinuous.Runner.add_async_module(ExUnitContinuous.RunnerAsyncTest) == :ok
   end
 
-#  test "run returns :wait_for_it when ExUnit is already running" do
-#    assert_raise  ExUnitContinuous.AlreadyRunningException, fn ->
-#      ExUnitContinuous.Runner.run([__MODULE__])
-#    end
-#  end
-
+  #  test "run returns :wait_for_it when ExUnit is already running" do
+  #    assert_raise  ExUnitContinuous.AlreadyRunningException, fn ->
+  #      ExUnitContinuous.Runner.run([__MODULE__])
+  #    end
+  #  end
 end

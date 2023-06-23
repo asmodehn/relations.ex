@@ -23,13 +23,12 @@ defmodule ExUnitContinuous.Updater do
             raise %RuntimeError{}
 
           _other ->
-#            IO.inspect(other)
+            #            IO.inspect(other)
             raise %RuntimeError{}
         end
       end
 
     if drop_sync do
-
       sync_mods = ExUnitServer.drop_sync_modules()
 
       compiled |> Enum.filter(fn m -> m not in sync_mods end)
@@ -37,7 +36,6 @@ defmodule ExUnitContinuous.Updater do
       compiled
     end
   end
-
 
   @doc ~s"""
     Recompile the source_file and loads it.
@@ -47,8 +45,9 @@ defmodule ExUnitContinuous.Updater do
 
     This needs to be improved...
   """
-  def ensure_updated(_module, source_file, opts \\ [drop_sync: true]) do
-    compile!(source_file, opts)
+  def ensure_updated(module, opts \\ [drop_sync: true]) do
+    [source_path | _] = module.__info__(:attributes)[:source_path]
+
+    compile!(source_path, opts)
   end
-  # TODO : figure out how to link module with source file...
 end

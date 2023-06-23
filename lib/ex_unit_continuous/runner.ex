@@ -3,7 +3,6 @@ defmodule ExUnitContinuous.Runner do
     This module manages running ExUnit tests
   """
 
-
   alias ExUnitContinuous.AlreadyRunningException
   alias ExUnitContinuous.ExUnitServer
 
@@ -16,14 +15,13 @@ defmodule ExUnitContinuous.Runner do
     # Ensure this is an async test
     # => no side-effect, can run along side other tests and the app
     if module.__info__(:attributes)
-           |> Keyword.get(:ex_unit_async, [false])
-           |> Enum.all?() do
+       |> Keyword.get(:ex_unit_async, [false])
+       |> Enum.all?() do
       ExUnitServer.add_async_module(module)
     else
       :sync_module
     end
   end
-
 
   # Duplicated from ExUnit
   defp persist_defaults(config) do
@@ -59,6 +57,7 @@ defmodule ExUnitContinuous.Runner do
     end
 
     config = ExUnit.configuration()
+
     if config[:continuous_autorun] do
       :wait_for_it
     else

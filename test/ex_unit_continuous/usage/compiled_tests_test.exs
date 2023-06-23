@@ -1,9 +1,9 @@
 defmodule ExUnitContinuous.CompiledTestsTest do
   use ExUnit.Case
 
-  test "compile examples, keep only async test modules" do
+  test "ensure_update by compiling module source again" do
     assert [ExUnitContinuous.CompiledASyncTest] ==
-             ExUnitContinuous.Updater.compile!("test/ex_unit_continuous/usage/compiled_tests.ex")
+             ExUnitContinuous.Updater.ensure_updated(ExUnitContinuous.CompiledASyncTest)
   end
 
   # VERIFY: Only ASync checks should have run,

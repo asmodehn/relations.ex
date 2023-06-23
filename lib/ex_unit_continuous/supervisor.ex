@@ -1,5 +1,4 @@
 defmodule ExUnitContinuous.Supervisor do
-
   @moduledoc ~s"""
     This module handles processes related with running ExUnit tests
     on any environment.

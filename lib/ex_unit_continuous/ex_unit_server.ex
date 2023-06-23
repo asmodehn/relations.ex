@@ -1,5 +1,4 @@
 defmodule ExUnitContinuous.ExUnitServer do
-
   @moduledoc ~s"""
     This modules adds an interface to ExUnit.Server, to manipulate its state
     when there is no expected interface for it.
@@ -18,13 +17,12 @@ defmodule ExUnitContinuous.ExUnitServer do
     Process.whereis(ExUnit.Server)
   end
 
-
   @doc ~s"""
     Little hack to get the list of sync modules in ExUnit.Server
   """
   @spec _sync_modules() :: [atom()]
   def _sync_modules() do
-      :sys.get_state(pid())[:sync_modules]
+    :sys.get_state(pid())[:sync_modules]
   end
 
   @doc ~s"""
@@ -36,15 +34,16 @@ defmodule ExUnitContinuous.ExUnitServer do
       %{sync_modules: sync_mods} = state ->
         %{state | sync_modules: fun.(sync_mods)}
     end)
+
     _sync_modules()
   end
 
   @doc ~s"""
     Little hack to get the list of async modules in ExUnit.Server
   """
-    @spec _async_modules() :: [atom()]
+  @spec _async_modules() :: [atom()]
   def _async_modules() do
-      :sys.get_state(pid())[:async_modules]
+    :sys.get_state(pid())[:async_modules]
   end
 
   @doc ~s"""
@@ -56,6 +55,7 @@ defmodule ExUnitContinuous.ExUnitServer do
       %{async_modules: async_mods} = state ->
         %{state | async_modules: fun.(async_mods)}
     end)
+
     _async_modules()
   end
 
@@ -64,7 +64,7 @@ defmodule ExUnitContinuous.ExUnitServer do
   """
   @spec _loaded() :: integer() | :done
   def _loaded() do
-      :sys.get_state(pid())[:loaded]
+    :sys.get_state(pid())[:loaded]
   end
 
   @doc ~s"""
@@ -75,9 +75,9 @@ defmodule ExUnitContinuous.ExUnitServer do
     try do
       ExUnit.Server.add_async_module(module)
     rescue
-        e ->
-          Logger.error(Exception.format(:error, e, __STACKTRACE__))
-          reraise e, __STACKTRACE__
+      e ->
+        Logger.error(Exception.format(:error, e, __STACKTRACE__))
+        reraise e, __STACKTRACE__
     end
   end
 
@@ -86,15 +86,15 @@ defmodule ExUnitContinuous.ExUnitServer do
   """
   @spec drop_sync_modules() :: [atom()]
   def drop_sync_modules() do
-      # highjack registered ex_unit tests to remove the non-async ones
-      # before starting the test suite.
-      sync_mods = _sync_modules()
-      _sync_modules(fn _ -> [] end)
+    # highjack registered ex_unit tests to remove the non-async ones
+    # before starting the test suite.
+    sync_mods = _sync_modules()
+    _sync_modules(fn _ -> [] end)
 
-      if sync_mods do
-        IO.warn("Ignored sync test modules: #{inspect(sync_mods)}.")
-      end
-      sync_mods
+    if sync_mods do
+      IO.warn("Ignored sync test modules: #{inspect(sync_mods)}.")
+    end
+
+    sync_mods
   end
-
 end

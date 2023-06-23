@@ -33,6 +33,10 @@ defmodule Relations.MixProject do
     ]
   end
 
+  # TODO : seem we can get rid of the "application" and keep a simple library here...
+  # After all, while keeping things simple the state to keep around is the link module -> source_path
+  # And it is stored in the module itself
+
   # ex_unit is run by mix on test environment
   defp applications(:test), do: [:logger]
   # but for other envs, we need to start ex_unit
